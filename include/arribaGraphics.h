@@ -92,13 +92,11 @@ namespace Arriba::Graphics
             Arriba::Maths::Transform *transform;
     };
 
-    //TODO: Make this work
     class AdvancedTexture
     {
         protected:
         int width;
         int height;
-        
         unsigned int FBO;
 
         public:
@@ -107,6 +105,7 @@ namespace Arriba::Graphics
         virtual void update();
 
         unsigned int texID;
+        glm::mat4 transformMatrix;
     };
 
     struct CharInfo

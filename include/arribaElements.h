@@ -1,6 +1,7 @@
 #pragma once
 #include <arriba.h>
 #include <arribaPrimitives.h>
+#include <arribaGraphics.h>
 #include <vector>
 
 namespace Arriba::Elements
@@ -22,6 +23,12 @@ namespace Arriba::Elements
             virtual void onFrame();
             void setText(const char*);
             void registerCallback(void (*)());
+    };
+
+    class ListTexture : public Arriba::Graphics::AdvancedTexture
+    {
+        public:
+        virtual void update();
     };
 
     /*TODO: Add lists

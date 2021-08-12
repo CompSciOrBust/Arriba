@@ -231,7 +231,7 @@ Arriba::Graphics::Renderer::Renderer()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOID);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_DYNAMIC_DRAW);
     //Specify the vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -341,6 +341,9 @@ Arriba::Graphics::AdvancedTexture::AdvancedTexture(int _width, int _height)
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) printf("Error: framebuffer incomplete\n");
     //Unbind the frame buffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //Set up the framebuffer's transform matrix
+    transformMatrix = glm::ortho(0.0f, (float)width, (float)height, 0.0f, 0.0f, 10000.0f);
 }
 
 Arriba::Graphics::AdvancedTexture::~AdvancedTexture()
@@ -352,12 +355,19 @@ Arriba::Graphics::AdvancedTexture::~AdvancedTexture()
 }
 
 //DEBUG ONLY
+#include <arribaPrimitives.h>
 void Arriba::Graphics::AdvancedTexture::update()
 {
-    printf("Updating\n");
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
     glClearColor(0.0f, 0.3f, 0.6f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     //Do magic here
+    Arriba::Primitives::Quad* e = new Arriba::Primitives::Character(Arriba::Graphics::getFont(48)['d']);
+    e->transform.position = {720/2,720/2,0};
+    //Arriba::UIObject* e = new Arriba::Primitives::Quad(0,0,200,200, Arriba::Graphics::Pivot::topLeft);
+    //Arriba::Primitives::Text* e = new Arriba::Primitives::Text("Arriba!", 48);
+    e->setColour({0,1,0,1});
+    e->renderer->renderObject();
+    e->destroy();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

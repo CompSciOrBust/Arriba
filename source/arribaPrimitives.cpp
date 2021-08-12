@@ -53,12 +53,20 @@ void Arriba::Primitives::Quad::setDimensions(int _width, int _height, Arriba::Gr
         bottom = -height;
     }
 
-    float verts[12] = {
-        right,  top,    0.0f,  // top right
-        right,  bottom, 0.0f,  // bottom right
-        left,   bottom, 0.0f,  // bottom left
-        left,   top,    0.0f   // top left 
+    //Texture Y coordinates here are a bit hacked to work around inversion issue
+    float verts[20] = {
+        right,  top,    0.0f, 1.0f, 0.0f,  // top right
+        right,  bottom, 0.0f, 1.0f, 1.0f,  // bottom right
+        left,   bottom, 0.0f, 0.0f, 1.0f,  // bottom left
+        left,   top,    0.0f, 0.0f, 0.0f  // top left 
     };
+
+    //float verts[20] = {
+    //    right,  top,    0.0f, 1.0f, 1.0f,  // top right
+    //    right,  bottom, 0.0f, 1.0f, 0.0f,  // bottom right
+    //    left,   bottom, 0.0f, 0.0f, 0.0f,  // bottom left
+    //    left,   top,    0.0f, 0.0f, 1.0f  // top left 
+    //};
 
     unsigned int indexes[6] = {
         0, 1, 3, //First triangle
