@@ -25,25 +25,24 @@ namespace Arriba::Elements
             void registerCallback(void (*)());
     };
 
-    class ListTexture : public Arriba::Graphics::AdvancedTexture
-    {
-        public:
-        virtual void update();
-    };
-
-    /*TODO: Add lists
-    class InertialList : Arriba::Primitives::Quad
+    class InertialListTexture : public Arriba::Graphics::AdvancedTexture, public Arriba::Primitives::Quad
     {
         private:
-            float scrollOffset = 0;
+            Arriba::Primitives::Quad* root = nullptr;
             float inertia = 0;
-            float textHeight = 25;
-            std::vector<void (*)(int)> callbacks;
-            std::vector<std::string> texts;
-        public:
-            InertialList();
+            int itemHeight = 70;
+            int itemCount = 0;
+            int selectedIndex = -1;
+            int lastSelectedIndex = -1;
+            glm::vec4 neutral = {0.22,0.47,0.93,1};
+            glm::vec4 highlightA = {0.1,0.95,0.98,1};
+            glm::vec4 highlightB = {0.5,0.85,1,1};
+            glm::vec4 activatedColour = {1,1,1,1};
 
-            void registerCallback(void (*)(int));
-            void setTexts(std::vector<std::string>);
-    };*/
+        public:
+            InertialListTexture(int, int, int, int, std::vector<std::string>);
+            ~InertialListTexture();
+            virtual void onFrame();
+            virtual void update();
+    };
 }

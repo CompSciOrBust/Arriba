@@ -54,6 +54,20 @@ namespace Arriba::Graphics
             unsigned int progID;
     };
 
+    class AdvancedTexture
+    {
+        public:
+        AdvancedTexture(int _width, int _height);
+        ~AdvancedTexture();
+        virtual void update();
+
+        unsigned int texID;
+        unsigned int FBO;
+        glm::mat4 clipSpaceMatrix;
+        int height;
+        int width;
+    };
+
     class Renderer
     {
         protected:
@@ -90,22 +104,7 @@ namespace Arriba::Graphics
             glm::vec4 getColour();
 
             Arriba::Maths::Transform *transform;
-    };
-
-    class AdvancedTexture
-    {
-        protected:
-        int width;
-        int height;
-        unsigned int FBO;
-
-        public:
-        AdvancedTexture(int _width, int _height);
-        ~AdvancedTexture();
-        virtual void update();
-
-        unsigned int texID;
-        glm::mat4 transformMatrix;
+            Arriba::Graphics::AdvancedTexture* FBOwner = nullptr;
     };
 
     struct CharInfo

@@ -17,7 +17,7 @@ void Arriba::Input::updateHID()
     hidGetTouchScreenStates(&touchState, 1);
     if (touchScreenPressed())
     {
-        touch.delta = {touch.pos.x - touchState.touches[0].x, touch.pos.y - touchState.touches[0].y};
+        if(touchLastFrame) touch.delta = {touch.pos.x - touchState.touches[0].x, touch.pos.y - touchState.touches[0].y};
         touch.pos = {touchState.touches[0].x, touchState.touches[0].y};
         if (!touchLastFrame) touch.origin = touch.pos;
         touch.downTime += Arriba::deltaTime;

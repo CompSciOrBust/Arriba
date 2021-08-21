@@ -32,7 +32,7 @@ void Arriba::Graphics::initGraphics()
     //Set the view port size and position
     glViewport(0, 0, windowWidth, windowHeight);
     //Create the clip space matrix
-    clipSpaceMatrix = glm::ortho(0.0f, (float)windowWidth, float(windowHeight), 0.0f, 0.0f, 10000.0f);
+    clipSpaceMatrix = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f, 0.0f, 10000.0f);
     //Enable blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -215,6 +215,38 @@ void Arriba::Graphics::Shader::setProgID(unsigned int _ID)
     sharedShader = true;
 }
 
+Arriba::Graphics::AdvancedTexture::AdvancedTexture(int _width, int _height)
+{
+    width = _width;
+    height = _height;
+    //Gen and bind the new frame buffer
+    glGenFramebuffers(1, &FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    //Generate a new texture to target from the frame buffer
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_2D, texID);
+    //Note we don't write data to the texture since we're rendering to it from the frame buffer
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //Attach the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texID, 0);
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) printf("Error: framebuffer incomplete\n");
+    //Unbind the frame buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //Create clipspace for framebuffer
+    clipSpaceMatrix = glm::ortho(0.0f, (float)width, (float)height, 0.0f, 0.0f, 10000.0f);
+}
+
+Arriba::Graphics::AdvancedTexture::~AdvancedTexture()
+{
+    //Delete the frame buffer
+    glDeleteFramebuffers(1, &FBO);
+    //Delete the texture
+    glDeleteTextures(1, &texID);
+}
+
 Arriba::Graphics::Renderer::Renderer()
 {
     //Load shader
@@ -269,20 +301,38 @@ void Arriba::Graphics::Renderer::updateParentTransform(glm::mat4 pt)
 
 void Arriba::Graphics::Renderer::renderObject()
 {
+    //Activate shader, set the colour, and bind the VAO
     thisShader.activate();
     thisShader.setFloat4("colour", colour);
     glBindVertexArray(VAOID);
 
     //Tranform the verts to the correct location
     glm::mat4 transformationMatrix = getTransformMatrix();
-
     unsigned int transformLoc = glGetUniformLocation(thisShader.progID, "transform");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformationMatrix));
+    //Get the projection matrix
     unsigned int projectionLoc = glGetUniformLocation(thisShader.progID, "projection");
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(clipSpaceMatrix));
-
+    //Bind any textures
     glBindTexture(GL_TEXTURE_2D, texID);
-    glDrawElements(GL_TRIANGLES, sizeof(indexes), GL_UNSIGNED_INT, 0);
+    //If belongs to a framebuffer
+    if(FBOwner != nullptr)
+    {
+        //Bind the FB and set the view port size
+        glBindFramebuffer(GL_FRAMEBUFFER, FBOwner->FBO);
+        glViewport(0, 0, FBOwner->width, FBOwner->height);
+        //Set the transform matrix to the FB's clipspace matrix
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(FBOwner->clipSpaceMatrix));
+        //Draw object and undo changes to OpenGL's state
+        glDrawElements(GL_TRIANGLES, sizeof(indexes), GL_UNSIGNED_INT, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, windowWidth, windowHeight);
+    }
+    //If not beloning to an FBO render as normal
+    else 
+    {
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(clipSpaceMatrix));
+        glDrawElements(GL_TRIANGLES, sizeof(indexes), GL_UNSIGNED_INT, 0);
+    }
     glBindVertexArray(0);
 }
 
@@ -320,38 +370,6 @@ void Arriba::Graphics::Renderer::setColour(glm::vec4 _colour)
 glm::vec4 Arriba::Graphics::Renderer::getColour()
 {
     return colour;
-}
-
-Arriba::Graphics::AdvancedTexture::AdvancedTexture(int _width, int _height)
-{
-    width = _width;
-    height = _height;
-    //Gen and bind the new frame buffer
-    glGenFramebuffers(1, &FBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-    //Generate a new texture to target from the frame buffer
-    glGenTextures(1, &texID);
-    glBindTexture(GL_TEXTURE_2D, texID);
-    //Note we don't write data to the texture since we're rendering to it from the frame buffer
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //Attach the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texID, 0);
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) printf("Error: framebuffer incomplete\n");
-    //Unbind the frame buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //Set up the framebuffer's transform matrix
-    transformMatrix = glm::ortho(0.0f, (float)width, (float)height, 0.0f, 0.0f, 10000.0f);
-}
-
-Arriba::Graphics::AdvancedTexture::~AdvancedTexture()
-{
-    //Delete the frame buffer
-    glDeleteFramebuffers(1, &FBO);
-    //Delete the texture
-    glDeleteTextures(1, &texID);
 }
 
 //DEBUG ONLY

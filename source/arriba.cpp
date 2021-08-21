@@ -64,8 +64,8 @@ void Arriba::drawFrame()
 
 void Arriba::drawFrameActions(UIObject* object)
 {
-    //Skip if disabled
-    if(object->enabled == false) return;
+    //Skip if disabled or belongs to framebuffer
+    if(object->enabled == false || object->renderer->FBOwner != nullptr) return;
     object->onFrame(); //Perform actions
     //Call update on each behaviour
     for (unsigned int i = 0; i < object->getBehaviours().size(); i++)
@@ -78,6 +78,20 @@ void Arriba::drawFrameActions(UIObject* object)
     {
         object->getChildren()[i]->renderer->updateParentTransform(object->renderer->getTransformMatrix());
         drawFrameActions(object->getChildren()[i]);
+    }
+}
+
+void Arriba::drawTextureObject(UIObject* object)
+{
+    //Skip if disabled
+    if(object->enabled == false) return;
+    //Render object
+    object->renderer->renderObject();
+    //Do same for all children
+    for (unsigned int i = 0; i < object->getChildren().size(); i++)
+    {
+        object->getChildren()[i]->renderer->updateParentTransform(object->renderer->getTransformMatrix());
+        drawTextureObject(object->getChildren()[i]);
     }
 }
 
@@ -132,6 +146,15 @@ glm::vec4 Arriba::UIObject::getColour()
 glm::mat4 Arriba::UIObject::getGlobalPos()
 {
     return renderer->getTransformMatrix();
+}
+
+void Arriba::UIObject::setFBOwner(Arriba::Graphics::AdvancedTexture* fb)
+{
+    this->renderer->FBOwner = fb;
+    for (unsigned int i = 0; i < children.size(); i++)
+    {
+        children[i]->setFBOwner(fb);
+    }
 }
 
 void Arriba::UIObject::destroy()

@@ -46,6 +46,7 @@ namespace Arriba
             virtual void setColour(glm::vec4);
             glm::vec4 getColour();
             glm::mat4 getGlobalPos();
+            void setFBOwner(Arriba::Graphics::AdvancedTexture* fb);
             void destroy();
 
             Arriba::Maths::Transform transform;
@@ -60,6 +61,7 @@ namespace Arriba
     void exit();
     void drawFrame();
     void drawFrameActions(UIObject* object);
+    void drawTextureObject(UIObject* object);
     UIObject* findObjectByName(std::string name);
     std::vector<UIObject*> findObjectsByTag(std::string tag);
 }
