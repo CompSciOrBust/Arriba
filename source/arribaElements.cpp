@@ -5,12 +5,14 @@ Arriba::Elements::Button::Button() : Arriba::Primitives::Quad(0,0,0,0, Arriba::G
     text = new Arriba::Primitives::Text("Default", 48);
     text->setParent(this);
     setDimensions(200, 200, Arriba::Graphics::Pivot::centre);
-    text->transform.position = {(getRight() + getLeft())/2, (getTop() + getBottom())/2, 0};
+    text->transform.position = {(right + left)/2, (top + bottom)/2, 0};
     setColour(neutral);
 }
 
 void Arriba::Elements::Button::onFrame()
 {
+    //"Temporary" hack to avoid rewriting buttons to use framebuffers
+    text->transform.position = {(right + left)/2, (top + bottom)/2, 0};
     //When A pressed call all callbacks
     if(Arriba::Input::buttonDown(HidNpadButton_A) && Arriba::highlightedObject == this)
     {

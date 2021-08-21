@@ -6,7 +6,7 @@ namespace Arriba::Primitives
 {
     class Quad : public Arriba::UIObject
     {
-        private:
+        protected:
         float left, right, top, bottom;
 
         public:
