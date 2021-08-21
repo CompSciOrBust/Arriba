@@ -34,7 +34,7 @@ namespace Arriba
 
         public:
             UIObject();
-            ~UIObject();
+            virtual ~UIObject();
             
             void setParent(UIObject* newParent);
             void removeChild(int ID);

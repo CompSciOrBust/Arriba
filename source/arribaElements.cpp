@@ -69,9 +69,6 @@ Arriba::Elements::InertialListTexture::InertialListTexture(int _x, int _y, int _
     {
         Arriba::Primitives::Text* itemText = new Arriba::Primitives::Text(strings[i].c_str(), 48);
         Arriba::Primitives::Quad* itemContainer = new Arriba::Primitives::Quad(0, i * itemHeight, _width, itemHeight, Arriba::Graphics::Pivot::topLeft);
-        //itemText->setDimensions(itemText->width, itemText->height, Arriba::Graphics::Pivot::centre);
-        //itemText->setFBOwner(this);
-        //itemText->transform.position.y = itemText.h
         itemText->setColour({0.0f, 0.0f, 0.0f, 1.0f});
         itemText->setParent(itemContainer);
         itemText->transform.position.x += itemText->width / 2 + _width * 0.05;
@@ -124,10 +121,19 @@ void Arriba::Elements::InertialListTexture::onFrame()
             else
             {
                 //Highlight correct item when tapped
-                selectedIndex = int(round(Quad::height / itemHeight)) - int((Quad::getTop() - touchY + root->transform.position.y) / itemHeight);
+                float relativeTouchY = Quad::getBottom() + touchY;
+                for (unsigned int i = 0; i < itemCount+1; i++) if(relativeTouchY > root->transform.position.y + i * itemHeight) selectedIndex = i-1;
+                //This is a lot nicer than the hack above but it has an off by one error when there is half an item on screen.
+                //selectedIndex = int(round(Quad::height / itemHeight)) - int((Quad::getTop() - touchY + root->transform.position.y) / itemHeight);
             }
         }
         else if(Arriba::highlightedObject == this) highlightedObject = 0;
+    }
+    //If selected index is off screen add inertia to bring it on screen
+    if(selectedIndex >= 0)
+    {
+        if(selectedIndex * itemHeight + root->transform.position.y < 0) inertia += 2;
+        else if((selectedIndex+1) * itemHeight + root->transform.position.y > Quad::height) inertia -= 2;
     }
     //Deal with inertia
     root->transform.position.y += inertia;
