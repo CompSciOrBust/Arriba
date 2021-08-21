@@ -11,6 +11,7 @@ namespace Arriba
     class UIObject;
     inline std::vector<std::shared_ptr<UIObject>> objectList;
     inline double deltaTime = 0;
+    inline double time = 0;
     inline unsigned long lastFrameTime = 0;
     inline UIObject* highlightedObject = NULL;
 

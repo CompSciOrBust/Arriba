@@ -12,6 +12,7 @@ namespace Arriba::Input
         glm::vec2 origin{0};
         float downTime = 0;
         bool start;
+        bool end;
     };
 
     inline PadState pad;

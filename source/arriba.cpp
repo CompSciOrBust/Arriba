@@ -42,6 +42,7 @@ void Arriba::drawFrame()
     //Calculate delta time
     double msSinceLastFrame = (armTicksToNs(armGetSystemTick()) - lastFrameTime) / 1000000;
     deltaTime = msSinceLastFrame / 1000;
+    time += deltaTime;
     lastFrameTime = armTicksToNs(armGetSystemTick());
     //Update input
     Arriba::Input::updateHID();

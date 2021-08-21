@@ -23,7 +23,11 @@ void Arriba::Input::updateHID()
         touch.downTime += Arriba::deltaTime;
         touch.start = !touchLastFrame;
     }
-    else touch.downTime = 0;
+    else
+    {
+        touch.downTime = 0;
+    }
+    touch.end = !touchScreenPressed() && touchLastFrame;
     touchLastFrame = touchScreenPressed();
 }
 

@@ -6,6 +6,7 @@ Arriba::Elements::Button::Button() : Arriba::Primitives::Quad(0,0,0,0, Arriba::G
     text->setParent(this);
     setDimensions(200, 200, Arriba::Graphics::Pivot::centre);
     text->transform.position = {(getRight() + getLeft())/2, (getTop() + getBottom())/2, 0};
+    setColour(neutral);
 }
 
 void Arriba::Elements::Button::onFrame()
@@ -38,15 +39,15 @@ void Arriba::Elements::Button::onFrame()
     }
     //When highlighted cycle between neutral and highlighted colour
     glm::vec4 targetColour = neutral;
-    float lerpValue = (sin(time*4) + 1) / 2;
+    float lerpValue = (sin(Arriba::time*4) + 1) / 2;
     if(Arriba::highlightedObject == this)
     {
-        time += Arriba::deltaTime;
         targetColour = glm::mix(highlightA, highlightB, lerpValue);
         if(Arriba::Input::buttonDown(HidNpadButton_A) || isTouched) setColour(activatedColour);
     }
     //Slowly transition to the target colour
-    setColour(glm::mix(getColour(), targetColour, 0.375)); //This should account for delta time but doesn't because it causes bugs
+    float fadeTime = 3 * Arriba::deltaTime;
+    setColour(glm::mix(getColour(), targetColour, fadeTime)); //This should account for delta time but doesn't because it causes bugs
 }
 
 void Arriba::Elements::Button::setText(const char* _text)
@@ -59,33 +60,42 @@ void Arriba::Elements::Button::registerCallback(void (*func)())
     callbacks.push_back(func);
 }
 
-Arriba::Elements::InertialListTexture::InertialListTexture(int _x, int _y, int _width, int _height, std::vector<std::string> strings) : Arriba::Graphics::AdvancedTexture(_width, _height), Arriba::Primitives::Quad(_x, _y, _width, _height, Arriba::Graphics::Pivot::topLeft)
+Arriba::Elements::InertialList::InertialList(int _x, int _y, int _width, int _height, std::vector<std::string> strings) : Arriba::Graphics::AdvancedTexture(_width, _height), Arriba::Primitives::Quad(_x, _y, _width, _height, Arriba::Graphics::Pivot::topLeft)
 {
     renderer->setTexture(texID);
     root = new Arriba::Primitives::Quad(0,0,0,0,Arriba::Graphics::Pivot::centre);
     root->setColour({0.0f,0.0f,0.0f,0.0f});
-    itemCount = strings.size();
-    for (unsigned int i = 0; i < strings.size(); i++)
-    {
-        Arriba::Primitives::Text* itemText = new Arriba::Primitives::Text(strings[i].c_str(), 48);
-        Arriba::Primitives::Quad* itemContainer = new Arriba::Primitives::Quad(0, i * itemHeight, _width, itemHeight, Arriba::Graphics::Pivot::topLeft);
-        itemText->setColour({0.0f, 0.0f, 0.0f, 1.0f});
-        itemText->setParent(itemContainer);
-        itemText->transform.position.x += itemText->width / 2 + _width * 0.05;
-        itemText->transform.position.y += itemHeight / 2;
-        itemContainer->setParent(root);
-    }
+    updateStrings(strings);
     root->setFBOwner(this);
 }
 
-Arriba::Elements::InertialListTexture::~InertialListTexture()
+Arriba::Elements::InertialList::~InertialList()
 {
     root->destroy();
 }
 
-void Arriba::Elements::InertialListTexture::onFrame()
+void Arriba::Elements::InertialList::updateStrings(std::vector<std::string> strings)
 {
-    Arriba::highlightedObject = this; //Debug
+    for (unsigned int i = 0; i < root->getChildren().size(); i++)
+    {
+        root->getChildren()[0]->destroy();
+    }
+    itemCount = strings.size();
+    for (unsigned int i = 0; i < itemCount; i++)
+    {
+        Arriba::Primitives::Text* itemText = new Arriba::Primitives::Text(strings[i].c_str(), 48);
+        Arriba::Primitives::Quad* itemContainer = new Arriba::Primitives::Quad(0, i * itemHeight, Quad::width, itemHeight, Arriba::Graphics::Pivot::topLeft);
+        itemText->setColour({0.0f, 0.0f, 0.0f, 1.0f});
+        itemText->setParent(itemContainer);
+        itemText->transform.position.x += itemText->width / 2 + Quad::width * 0.05;
+        itemText->transform.position.y += itemHeight / 2;
+        itemContainer->setParent(root);
+        itemContainer->setColour(neutral);
+    }
+}
+
+void Arriba::Elements::InertialList::onFrame()
+{
     //Handle button input
     if(Arriba::highlightedObject == this)
     {
@@ -100,6 +110,14 @@ void Arriba::Elements::InertialListTexture::onFrame()
         {
             selectedIndex += 1;
             if(selectedIndex > root->getChildren().size()-1) selectedIndex = root->getChildren().size()-1;
+        }
+        //A pressed
+        if(Arriba::Input::buttonDown(HidNpadButton_A) && selectedIndex != -1)
+        {
+            for (unsigned int i = 0; i < callbacks.size(); i++)
+            {
+                callbacks[i](selectedIndex);
+            }
         }
     }
     //Handle touch input
@@ -129,6 +147,14 @@ void Arriba::Elements::InertialListTexture::onFrame()
         }
         else if(Arriba::highlightedObject == this) highlightedObject = 0;
     }
+    //Callback for touch finished
+    if(Arriba::highlightedObject == this && Arriba::Input::touch.end && selectedIndex != -1)
+    {
+        for (unsigned int i = 0; i < callbacks.size(); i++)
+        {
+            callbacks[i](selectedIndex);
+        }
+    }
     //If selected index is off screen add inertia to bring it on screen
     if(selectedIndex >= 0)
     {
@@ -139,18 +165,36 @@ void Arriba::Elements::InertialListTexture::onFrame()
     root->transform.position.y += inertia;
     inertia *= 0.8;
     //Make sure that the root stays within bounds
-    //Make sure list doesn't go too high
+    //Make sure root doesn't go too high
     if(root->transform.position.y > 0) root->transform.position.y = 0;
-    //Make sure list doesn't go too low
+    //Make sure root doesn't go too low
     if(root->transform.position.y + itemHeight * itemCount < Quad::height) root->transform.position.y = Quad::height - itemCount * itemHeight;
     //Highlight selected index
-    if(lastSelectedIndex >= 0) root->getChildren()[lastSelectedIndex]->setColour(neutral);
-    if(selectedIndex >= 0) root->getChildren()[selectedIndex]->setColour(highlightA);
+    float fadeTime = 3 * Arriba::deltaTime;
+    //Loop through each item
+    for (unsigned int i = 0; i < itemCount; i++)
+    {
+        //If this is not the selected item fade to neutral
+        if(i != selectedIndex) root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),neutral,fadeTime));
+        else
+        {
+            //If this is the selected item but the list is not highlighted fade to highlight b
+            if(Arriba::highlightedObject != this) root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),highlightB,fadeTime));
+            else //If this is the selected item pulse between highlight a and highlight b
+            {
+                float lerpValue = (sin(Arriba::time*4) + 1) / 2;
+                glm::vec4 targetColour = glm::mix(highlightA, highlightB, lerpValue);
+                //If A was pressed or item is newly selected pulse the activated colour
+                if(selectedIndex != lastSelectedIndex || Arriba::Input::buttonDown(HidNpadButton_A)) root->getChildren()[i]->setColour(activatedColour);
+                else root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),targetColour,fadeTime));
+            }
+        }
+    }
     lastSelectedIndex = selectedIndex;
     update();
 }
 
-void Arriba::Elements::InertialListTexture::update()
+void Arriba::Elements::InertialList::update()
 {
     //Render framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -158,4 +202,9 @@ void Arriba::Elements::InertialListTexture::update()
     glClear(GL_COLOR_BUFFER_BIT);
     drawTextureObject(root);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Arriba::Elements::InertialList::registerCallback(void (*func)(int))
+{
+    callbacks.push_back(func);
 }
