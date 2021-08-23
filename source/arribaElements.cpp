@@ -6,7 +6,7 @@ Arriba::Elements::Button::Button() : Arriba::Primitives::Quad(0,0,0,0, Arriba::G
     text->setParent(this);
     setDimensions(200, 200, Arriba::Graphics::Pivot::centre);
     text->transform.position = {(right + left)/2, (top + bottom)/2, 0};
-    setColour(neutral);
+    setColour(Arriba::Colour::neutral);
 }
 
 void Arriba::Elements::Button::onFrame()
@@ -40,12 +40,12 @@ void Arriba::Elements::Button::onFrame()
         else if(Arriba::highlightedObject == this) Arriba::highlightedObject = 0;
     }
     //When highlighted cycle between neutral and highlighted colour
-    glm::vec4 targetColour = neutral;
+    glm::vec4 targetColour = Arriba::Colour::neutral;
     float lerpValue = (sin(Arriba::time*4) + 1) / 2;
     if(Arriba::highlightedObject == this)
     {
-        targetColour = glm::mix(highlightA, highlightB, lerpValue);
-        if(Arriba::Input::buttonDown(HidNpadButton_A) || isTouched) setColour(activatedColour);
+        targetColour = glm::mix(Arriba::Colour::highlightA, Arriba::Colour::highlightB, lerpValue);
+        if(Arriba::Input::buttonDown(HidNpadButton_A) || isTouched) setColour(Arriba::Colour::activatedColour);
     }
     //Slowly transition to the target colour
     float fadeTime = 3 * Arriba::deltaTime;
@@ -92,7 +92,7 @@ void Arriba::Elements::InertialList::updateStrings(std::vector<std::string> stri
         itemText->transform.position.x += itemText->width / 2 + Quad::width * 0.05;
         itemText->transform.position.y += itemHeight / 2;
         itemContainer->setParent(root);
-        itemContainer->setColour(neutral);
+        itemContainer->setColour(Arriba::Colour::neutral);
     }
 }
 
@@ -177,17 +177,17 @@ void Arriba::Elements::InertialList::onFrame()
     for (unsigned int i = 0; i < itemCount; i++)
     {
         //If this is not the selected item fade to neutral
-        if(i != selectedIndex) root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),neutral,fadeTime));
+        if(i != selectedIndex) root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),Arriba::Colour::neutral,fadeTime));
         else
         {
             //If this is the selected item but the list is not highlighted fade to highlight b
-            if(Arriba::highlightedObject != this) root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),highlightB,fadeTime));
+            if(Arriba::highlightedObject != this) root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),Arriba::Colour::highlightB,fadeTime));
             else //If this is the selected item pulse between highlight a and highlight b
             {
                 float lerpValue = (sin(Arriba::time*4) + 1) / 2;
-                glm::vec4 targetColour = glm::mix(highlightA, highlightB, lerpValue);
+                glm::vec4 targetColour = glm::mix(Arriba::Colour::highlightA, Arriba::Colour::highlightB, lerpValue);
                 //If A was pressed or item is newly selected pulse the activated colour
-                if(selectedIndex != lastSelectedIndex || Arriba::Input::buttonDown(HidNpadButton_A)) root->getChildren()[i]->setColour(activatedColour);
+                if(selectedIndex != lastSelectedIndex || Arriba::Input::buttonDown(HidNpadButton_A)) root->getChildren()[i]->setColour(Arriba::Colour::activatedColour);
                 else root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),targetColour,fadeTime));
             }
         }

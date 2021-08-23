@@ -66,3 +66,11 @@ namespace Arriba
     UIObject* findObjectByName(std::string name);
     std::vector<UIObject*> findObjectsByTag(std::string tag);
 }
+
+namespace Arriba::Colour
+{
+    inline glm::vec4 neutral = {0.22,0.47,0.93,1};
+    inline glm::vec4 highlightA = {0.1,0.95,0.98,1};
+    inline glm::vec4 highlightB = {0.5,0.85,1,1};
+    inline glm::vec4 activatedColour = {1,1,1,1};
+}

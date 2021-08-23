@@ -11,10 +11,6 @@ namespace Arriba::Elements
         private:
             Arriba::Primitives::Text* text;
             std::vector<void (*)()> callbacks;
-            glm::vec4 neutral = {0.22,0.47,0.93,1};
-            glm::vec4 highlightA = {0.1,0.95,0.98,1};
-            glm::vec4 highlightB = {0.5,0.85,1,1};
-            glm::vec4 activatedColour = {1,1,1,1};
 
         public:
             Button();
@@ -34,10 +30,6 @@ namespace Arriba::Elements
             int itemCount = 0;
             int selectedIndex = -1;
             int lastSelectedIndex = -1;
-            glm::vec4 neutral = {0.22,0.47,0.93,1};
-            glm::vec4 highlightA = {0.1,0.95,0.98,1};
-            glm::vec4 highlightB = {0.5,0.85,1,1};
-            glm::vec4 activatedColour = {1,1,1,1};
 
         public:
             InertialList(int, int, int, int, std::vector<std::string>);
