@@ -180,8 +180,13 @@ void Arriba::UIObject::setParent(Arriba::UIObject* newParent)
 {
     //Remove self from parent's children
     if(parent) parent->removeChild(objectID);
-    //Add self to new parent's children
-    if(newParent) newParent->children.push_back(this);
+    //Add self to new parent's children and adopt their framebuffer owner
+    if(newParent)
+    {
+        newParent->children.push_back(this);
+        setFBOwner(newParent->renderer->FBOwner);
+    }
+    else setFBOwner(nullptr); //Set framebuffer owner to nullptr if no parent
     //Set parent to new parent
     parent = newParent;
 }
