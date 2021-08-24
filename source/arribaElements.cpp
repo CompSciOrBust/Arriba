@@ -78,7 +78,7 @@ Arriba::Elements::InertialList::~InertialList()
 
 void Arriba::Elements::InertialList::updateStrings(std::vector<std::string> strings)
 {
-    for (unsigned int i = 0; i < root->getChildren().size(); i++)
+    for (unsigned int i = 0; i < itemCount; i++)
     {
         root->getChildren()[0]->destroy();
     }
@@ -93,6 +93,11 @@ void Arriba::Elements::InertialList::updateStrings(std::vector<std::string> stri
         itemText->transform.position.y += itemHeight / 2;
         itemContainer->setParent(root);
         itemContainer->setColour(Arriba::Colour::neutral);
+    }
+    if(itemCount > 0)
+    {
+        selectedIndex = 0;
+        lastSelectedIndex = 0;
     }
 }
 
@@ -142,7 +147,7 @@ void Arriba::Elements::InertialList::onFrame()
             {
                 //Highlight correct item when tapped
                 float relativeTouchY = Quad::getBottom() + touchY;
-                for (unsigned int i = 0; i < itemCount+1; i++) if(relativeTouchY > root->transform.position.y + i * itemHeight) selectedIndex = i-1;
+                for (unsigned int i = 0; i < itemCount+1; i++) if(relativeTouchY > root->transform.position.y + i * itemHeight) selectedIndex = i - Quad::getBottom() / itemHeight;
                 //This is a lot nicer than the hack above but it has an off by one error when there is half an item on screen.
                 //selectedIndex = int(round(Quad::height / itemHeight)) - int((Quad::getTop() - touchY + root->transform.position.y) / itemHeight);
             }

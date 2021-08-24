@@ -16,6 +16,7 @@ void Arriba::init()
     {
         Arriba::Graphics::initGraphics();
         Arriba::Input::initInput();
+        lastFrameTime = armTicksToNs(armGetSystemTick());
     }
     printf("Init done!\n");
 }
