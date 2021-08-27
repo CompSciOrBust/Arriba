@@ -189,6 +189,18 @@ void Arriba::Graphics::Shader::activate()
     glUseProgram(progID);
 }
 
+void Arriba::Graphics::Shader::setFloat1(char* uniformName, float data)
+{
+    activate();
+    glUniform1f(glGetUniformLocation(progID, uniformName), data);
+}
+
+void Arriba::Graphics::Shader::setFloat2(char* uniformName, glm::vec2 data)
+{
+    activate();
+    glUniform2f(glGetUniformLocation(progID, uniformName), data.x, data.y);
+}
+
 void Arriba::Graphics::Shader::setFloat3(char* uniformName, glm::vec3 data)
 {
     activate();

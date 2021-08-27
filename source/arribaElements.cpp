@@ -78,6 +78,7 @@ Arriba::Elements::InertialList::~InertialList()
 
 void Arriba::Elements::InertialList::updateStrings(std::vector<std::string> strings)
 {
+    root->transform.position.y = 0;
     for (unsigned int i = 0; i < itemCount; i++)
     {
         root->getChildren()[0]->destroy();
@@ -109,14 +110,24 @@ void Arriba::Elements::InertialList::onFrame()
         //Up pressed
         if(Arriba::Input::buttonDown(HidNpadButton_Up))
         {
-            selectedIndex -= 1;
-            if(selectedIndex < 0) selectedIndex = 0;
+            if(selectedIndex >= 0 || itemCount * itemHeight < Quad::height)
+            {
+                selectedIndex -= 1;
+                if(selectedIndex < 0) selectedIndex = itemCount - 1;
+            }
+            //No item is currently selected but don't just jump to index 0
+            else selectedIndex = int(-root->transform.position.y / itemHeight);
         }
         //Down pressed
         if(Arriba::Input::buttonDown(HidNpadButton_Down))
         {
-            selectedIndex += 1;
-            if(selectedIndex > root->getChildren().size()-1) selectedIndex = root->getChildren().size()-1;
+            if(selectedIndex >= 0 || itemCount * itemHeight < Quad::height)
+            {
+                selectedIndex += 1;
+                if(selectedIndex > itemCount-1) selectedIndex = 0;
+            }
+            //No item is currently selected so select item at bottom of list
+            else selectedIndex = int(-root->transform.position.y / itemHeight);
         }
         //A pressed
         if(Arriba::Input::buttonDown(HidNpadButton_A) && selectedIndex != -1)
@@ -165,12 +176,13 @@ void Arriba::Elements::InertialList::onFrame()
     //If selected index is off screen add inertia to bring it on screen
     if(selectedIndex >= 0)
     {
-        if(selectedIndex * itemHeight + root->transform.position.y < 0) inertia += 2;
-        else if((selectedIndex+1) * itemHeight + root->transform.position.y > Quad::height) inertia -= 2;
+        //6.6665 was chosen here because 0.85^x as x goes to infinity converges on 6.6 recurring
+        if(selectedIndex * itemHeight + root->transform.position.y < 0) inertia = (selectedIndex * itemHeight + root->transform.position.y) / -6.6665;
+        else if((selectedIndex+1) * itemHeight + root->transform.position.y > Quad::height) inertia = ((selectedIndex+1) * itemHeight + root->transform.position.y - Quad::height) / -6.6665;
     }
     //Deal with inertia
     root->transform.position.y += inertia;
-    inertia *= 0.8;
+    inertia *= 0.85;
     //Make sure that the root stays within bounds
     //Make sure root doesn't go too high
     if(root->transform.position.y > 0) root->transform.position.y = 0;

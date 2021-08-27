@@ -47,6 +47,8 @@ namespace Arriba::Graphics
             ~Shader();
             
             void activate();
+            void setFloat1(char*, float);
+            void setFloat2(char*, glm::vec2);
             void setFloat3(char*, glm::vec3);
             void setFloat4(char*, glm::vec4);
             void updateFragments(const char*, const char*);
