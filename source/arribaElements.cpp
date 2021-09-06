@@ -65,6 +65,9 @@ void Arriba::Elements::Button::registerCallback(void (*func)())
 Arriba::Elements::InertialList::InertialList(int _x, int _y, int _width, int _height, std::vector<std::string> strings) : Arriba::Graphics::AdvancedTexture(_width, _height), Arriba::Primitives::Quad(_x, _y, _width, _height, Arriba::Graphics::Pivot::topLeft)
 {
     renderer->setTexture(texID);
+    bg = new Arriba::Primitives::Quad(0,0,Quad::width,Quad::height,Arriba::Graphics::Pivot::topLeft);
+    bg->setColour(Arriba::Colour::neutral);
+    bg->setFBOwner(this);
     root = new Arriba::Primitives::Quad(0,0,0,0,Arriba::Graphics::Pivot::centre);
     root->setColour({0.0f,0.0f,0.0f,0.0f});
     updateStrings(strings);
@@ -100,6 +103,7 @@ void Arriba::Elements::InertialList::updateStrings(std::vector<std::string> stri
         selectedIndex = 0;
         lastSelectedIndex = 0;
     }
+    bg->setDimensions(Quad::width, Quad::height - itemCount * itemHeight, Arriba::Graphics::Pivot::topLeft);
 }
 
 void Arriba::Elements::InertialList::onFrame()
@@ -209,6 +213,8 @@ void Arriba::Elements::InertialList::onFrame()
             }
         }
     }
+    //Set bg colour that is seen when there is not enough items
+    bg->setColour(glm::mix(bg->getColour(), Arriba::Colour::neutral, fadeTime));
     lastSelectedIndex = selectedIndex;
     update();
 }
@@ -219,6 +225,7 @@ void Arriba::Elements::InertialList::update()
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
     glClearColor(0.0f, 0.3f, 0.6f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+    drawTextureObject(bg);
     drawTextureObject(root);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

@@ -25,6 +25,7 @@ namespace Arriba::Elements
         private:
             std::vector<void (*)(int)> callbacks;
             Arriba::Primitives::Quad* root = nullptr;
+            Arriba::Primitives::Quad* bg = nullptr;
             float inertia = 0;
             int itemHeight = 70;
             int itemCount = 0;
