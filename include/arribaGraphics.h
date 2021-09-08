@@ -69,7 +69,7 @@ namespace Arriba::Graphics
         public:
         AdvancedTexture(int _width, int _height);
         ~AdvancedTexture();
-        virtual void update();
+        virtual void update(){};
 
         unsigned int texID;
         unsigned int FBO;
