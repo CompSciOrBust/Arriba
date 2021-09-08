@@ -168,6 +168,25 @@ unsigned int Arriba::Graphics::loadShader(const char* vertexPath, const char* fr
     return SID;
 }
 
+//HOS Functions
+#ifdef __SWITCH__
+void Arriba::Graphics::dockStatusCallback(AppletHookType type, void* parameters)
+{
+    switch (appletGetOperationMode())
+    {
+        case AppletOperationMode_Handheld:
+        Arriba::Graphics::windowWidth = 1280;
+        Arriba::Graphics::windowHeight = 720;
+        break;
+        case AppletOperationMode_Console:
+        Arriba::Graphics::windowWidth = 1920;
+        Arriba::Graphics::windowHeight = 1080;
+        break;
+        glViewport(0, 0, Arriba::Graphics::windowWidth, Arriba::Graphics::windowHeight);
+    }
+}
+#endif
+
 Arriba::Graphics::Shader::Shader(const char* vertexPath = "romfs:/VertexDefault.glsl", const char* fragmentPath = "romfs:/FragmentDefault.glsl")
 {
     updateFragments(vertexPath, fragmentPath);

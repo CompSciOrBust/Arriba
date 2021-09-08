@@ -6,6 +6,10 @@
 #include <glm/glm.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+//Includes for HOS
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
 
 namespace Arriba::Graphics
 {
@@ -26,6 +30,10 @@ namespace Arriba::Graphics
     void initGraphics();
     std::map<char, CharInfo> getFont(int);
     unsigned int loadShader(const char*, const char*);
+    //HOS functions
+    #ifdef __SWITCH__
+    void dockStatusCallback(AppletHookType type, void* parameters);
+    #endif
 
     enum Pivot
     {

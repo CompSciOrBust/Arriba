@@ -14,6 +14,10 @@ void Arriba::init()
     printf("Initializing\n");
     if(Arriba::Graphics::graphicsAreInitialised != true)
     {
+        //On Switch set up hook for docking / undocking
+        #ifdef __SWITCH__
+        appletHook(&switchDockCookie, Arriba::Graphics::dockStatusCallback, nullptr);
+        #endif
         Arriba::Graphics::initGraphics();
         Arriba::Input::initInput();
         lastFrameTime = armTicksToNs(armGetSystemTick());
@@ -34,6 +38,10 @@ void Arriba::exit()
     glDeleteProgram(Arriba::Graphics::textShaderID);
     //Kill GLFW
     glfwTerminate();
+    //On switch unhook dock event
+    #ifdef __SWITCH__
+        appletUnhook(&switchDockCookie);
+    #endif
 }
 
 void Arriba::drawFrame()

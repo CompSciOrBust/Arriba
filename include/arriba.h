@@ -5,6 +5,7 @@
 #include <arribaMaths.h>
 #include <arribaGraphics.h>
 #include <arribaInput.h>
+#include <switch.h>
 
 namespace Arriba
 {
@@ -14,6 +15,10 @@ namespace Arriba
     inline double time = 0;
     inline unsigned long lastFrameTime = 0;
     inline UIObject* highlightedObject = NULL;
+    //variables needed for Horizon OS
+    #ifdef __SWITCH__
+    inline AppletHookCookie switchDockCookie;
+    #endif
 
     class Behaviour
     {
