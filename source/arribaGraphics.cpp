@@ -250,8 +250,8 @@ namespace Arriba::Graphics
 
     AdvancedTexture::AdvancedTexture(int _width, int _height)
     {
-        width = _width;
-        height = _height;
+        tWidth = _width;
+        tHeight = _height;
         //Gen and bind the new frame buffer
         glGenFramebuffers(1, &FBO);
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -259,7 +259,7 @@ namespace Arriba::Graphics
         glGenTextures(1, &texID);
         glBindTexture(GL_TEXTURE_2D, texID);
         //Note we don't write data to the texture since we're rendering to it from the frame buffer
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tWidth, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         //Attach the texture to the frame buffer
@@ -269,7 +269,7 @@ namespace Arriba::Graphics
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
         //Create clipspace for framebuffer
-        clipSpaceMatrix = glm::ortho(0.0f, (float)width, (float)height, 0.0f, 0.0f, 10000.0f);
+        clipSpaceMatrix = glm::ortho(0.0f, (float)tWidth, (float)tHeight, 0.0f, 0.0f, 10000.0f);
     }
 
     AdvancedTexture::~AdvancedTexture()
@@ -278,6 +278,16 @@ namespace Arriba::Graphics
         glDeleteFramebuffers(1, &FBO);
         //Delete the texture
         glDeleteTextures(1, &texID);
+    }
+
+    void AdvancedTexture::resize(int _width, int _height)
+    {
+        tWidth = _width;
+        tHeight = _height;
+        glBindTexture(GL_TEXTURE_2D, texID);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tWidth, tHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        clipSpaceMatrix = glm::ortho(0.0f, (float)tWidth, (float)tHeight, 0.0f, 0.0f, 10000.0f);
     }
 
     Renderer::Renderer()
@@ -352,7 +362,7 @@ namespace Arriba::Graphics
         {
             //Bind the FB and set the view port size
             glBindFramebuffer(GL_FRAMEBUFFER, FBOwner->FBO);
-            glViewport(0, 0, FBOwner->width, FBOwner->height);
+            glViewport(0, 0, FBOwner->tWidth, FBOwner->tHeight);
             //Set the transform matrix to the FB's clipspace matrix
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(FBOwner->clipSpaceMatrix));
             //Draw object and undo changes to OpenGL's state

@@ -130,21 +130,15 @@ namespace Arriba::Primitives
         height = character.size[1];
     }
 
-    Text::Text(const char* text, int size) : Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre)
+    Text::Text(const char* text, int size) : Arriba::Graphics::AdvancedTexture(1,1), Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre)
     {
+        renderer->setTexture(texID);
         fontSize = size;
         setText(text);
     }
 
     void Text::setText(const char* text)
     {
-        //Nuke the kids
-        std::vector<Arriba::UIObject *> kids = getChildren();
-        while (kids.size() != 0)
-        {
-            kids[0]->destroy();
-            kids.erase(kids.begin());
-        }
         //Vars for storing geometry info
         int xOffset = 0;
         int maxHeight = 0;
@@ -156,34 +150,54 @@ namespace Arriba::Primitives
         {
             Arriba::Graphics::CharInfo character = charMap[text[i]];
             Quad* child = new Character(character);
-            child->setParent(this);
-            child->transform.position.x = xOffset;
+            chars.push_back(child);
+            child->setFBOwner(this);
+            child->setColour({1,1,1,1});
+            child->transform.position.x = xOffset + character.bearing[0];
             xOffset += (character.advance >> 6);
             maxHeight = (character.size[1] > maxHeight) ? character.size[1] : maxHeight;
-            minHeight = (-character.bearing[1] < minHeight) ? -character.bearing[1] : minHeight;
-
+            minHeight = (character.size[1] - character.bearing[1] > minHeight) ? character.size[1] - character.bearing[1] : minHeight;
         }
         //Center the text to the parent
-        int xDistance = xOffset / 2;
-        int yDistance = maxHeight / 2;
+        int xDistance = 0;
+        int yDistance = maxHeight;
         for (unsigned int i = 0; i < strnlen(text, 1024); i++)
         {
-            children.at(i)->transform.position.x -= xDistance;
-            children.at(i)->transform.position.y += yDistance;
+            chars.at(i)->transform.position.x -= xDistance;
+            chars.at(i)->transform.position.y += yDistance;
         }
         //Adjust the parent geometry
-        setDimensions(xOffset, maxHeight - minHeight / 2, Arriba::Graphics::Pivot::centre);
-        //Make BG invisible
-        renderer->setColour({0,0,0,0});
+        setDimensions(xOffset+2, maxHeight + minHeight+2, Arriba::Graphics::Pivot::centre);
+        //Set the colour
         setColour(fontColour);
+        //Resize the framebuffer
+        resize(width, height);
+        //Render framebuffer
+        update();
     }
 
     void Text::setColour(glm::vec4 _colour)
     {
         fontColour = _colour;
-        for (unsigned int i = 0; i < children.size(); i++)
+        renderer->setColour(_colour);
+    }
+
+    void Text::update()
+    {
+        //Render framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        for (unsigned int i = 0; i < chars.size(); i++)
         {
-            children[i]->setColour(fontColour);
+            drawTextureObject(chars[i]);
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //Destroy chars to keep FPS high
+        while (chars.size() != 0)
+        {
+            chars[0]->destroy();
+            chars.erase(chars.begin());
         }
     }
 }

@@ -69,13 +69,15 @@ namespace Arriba::Graphics
         public:
         AdvancedTexture(int _width, int _height);
         ~AdvancedTexture();
+
+        void resize(int _width, int _height);
         virtual void update(){};
 
         unsigned int texID;
         unsigned int FBO;
         glm::mat4 clipSpaceMatrix;
-        int height;
-        int width;
+        int tHeight;
+        int tWidth;
     };
 
     class Renderer
