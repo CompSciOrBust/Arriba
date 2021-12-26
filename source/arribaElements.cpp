@@ -105,7 +105,7 @@ namespace Arriba::Elements
             selectedIndex = 0;
             lastSelectedIndex = 0;
         }
-        bg->setDimensions(Quad::width, Quad::height - itemCount * itemHeight, Arriba::Graphics::Pivot::topLeft);
+        bg->setDimensions(Quad::width, Quad::height + itemCount * itemHeight, Arriba::Graphics::Pivot::topLeft);
     }
 
     void InertialList::onFrame()
@@ -164,7 +164,7 @@ namespace Arriba::Elements
                 {
                     //Highlight correct item when tapped
                     float relativeTouchY = Quad::getBottom() + touchY;
-                    for (unsigned int i = 0; i < itemCount+1; i++) if(relativeTouchY > root->transform.position.y + i * itemHeight) selectedIndex = i - Quad::getBottom() / itemHeight;
+                    for (unsigned int i = 0; i < itemCount+2; i++) if(relativeTouchY > root->transform.position.y + i * itemHeight && relativeTouchY < root->transform.position.y + (i+1) * itemHeight) selectedIndex = i - Quad::getBottom() / itemHeight;
                     //This is a lot nicer than the hack above but it has an off by one error when there is half an item on screen.
                     //selectedIndex = int(round(Quad::height / itemHeight)) - int((Quad::getTop() - touchY + root->transform.position.y) / itemHeight);
                 }
@@ -190,10 +190,10 @@ namespace Arriba::Elements
         root->transform.position.y += inertia;
         inertia *= 0.85;
         //Make sure that the root stays within bounds
-        //Make sure root doesn't go too high
-        if(root->transform.position.y > 0) root->transform.position.y = 0;
         //Make sure root doesn't go too low
         if(root->transform.position.y + itemHeight * itemCount < Quad::height) root->transform.position.y = Quad::height - itemCount * itemHeight;
+        //Make sure root doesn't go too high
+        if(root->transform.position.y > 0) root->transform.position.y = 0;
         //Highlight selected index
         float fadeTime = 3 * Arriba::deltaTime;
         //Loop through each item
