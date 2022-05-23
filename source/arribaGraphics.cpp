@@ -269,7 +269,7 @@ namespace Arriba::Graphics
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
         //Create clipspace for framebuffer
-        clipSpaceMatrix = glm::ortho(0.0f, (float)tWidth, (float)tHeight, 0.0f, 0.0f, 10000.0f);
+        clipSpaceMatrix = glm::ortho(0.0f, (float)tWidth, 0.0f, (float)tHeight, 0.0f, 10000.0f);
     }
 
     AdvancedTexture::~AdvancedTexture()
@@ -287,7 +287,7 @@ namespace Arriba::Graphics
         glBindTexture(GL_TEXTURE_2D, texID);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tWidth, tHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glBindTexture(GL_TEXTURE_2D, 0);
-        clipSpaceMatrix = glm::ortho(0.0f, (float)tWidth, (float)tHeight, 0.0f, 0.0f, 10000.0f);
+        clipSpaceMatrix = glm::ortho(0.0f, (float)tWidth, 0.0f, (float)tHeight, 0.0f, 10000.0f);
     }
 
     Renderer::Renderer()
