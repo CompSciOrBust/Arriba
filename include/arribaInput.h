@@ -7,9 +7,9 @@ namespace Arriba::Input
 {
     struct Touch
     {
-        glm::vec2 pos{0};
-        glm::vec2 delta{0};
-        glm::vec2 origin{0};
+        Arriba::Maths::vec2<float> pos{0};
+        Arriba::Maths::vec2<float> delta{0};
+        Arriba::Maths::vec2<float> origin{0};
         float downTime = 0;
         bool start;
         bool end;

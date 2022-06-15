@@ -1,15 +1,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <arribaGraphics.h>
+#include <arribaMaths.h>
 #include <stdio.h>
 #include <string>
 #include <iostream>
 #include <fstream>
 
-//GLM
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 //True type
 #include <ft2build.h>
 //Libnx
@@ -34,7 +31,7 @@ namespace Arriba::Graphics
         //Set the view port size and position
         glViewport(0, 0, windowWidth, windowHeight);
         //Create the clip space matrix
-        clipSpaceMatrix = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f, 0.0f, 10000.0f);
+        clipSpaceMatrix = Arriba::Maths::makeOrtho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f, 0.0f, 10000.0f);
         //Enable blending
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -90,8 +87,8 @@ namespace Arriba::Graphics
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 CharInfo character = {
                     texture,
-                    glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-                    glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+                    Arriba::Maths::vec2<int>{face->glyph->bitmap.width, face->glyph->bitmap.rows},
+                    Arriba::Maths::vec2<int>{face->glyph->bitmap_left, face->glyph->bitmap_top},
                     static_cast<unsigned int>(face->glyph->advance.x)};
                 charMapT.insert(std::make_pair(c, character));
             }
@@ -216,19 +213,19 @@ namespace Arriba::Graphics
         glUniform1f(glGetUniformLocation(progID, uniformName), data);
     }
 
-    void Shader::setFloat2(char* uniformName, glm::vec2 data)
+    void Shader::setFloat2(char* uniformName, Arriba::Maths::vec2<float> data)
     {
         activate();
         glUniform2f(glGetUniformLocation(progID, uniformName), data.x, data.y);
     }
 
-    void Shader::setFloat3(char* uniformName, glm::vec3 data)
+    void Shader::setFloat3(char* uniformName, Arriba::Maths::vec3<float> data)
     {
         activate();
         glUniform3f(glGetUniformLocation(progID, uniformName), data.x, data.y, data.z);
     }
 
-    void Shader::setFloat4(char* uniformName, glm::vec4 data)
+    void Shader::setFloat4(char* uniformName, Arriba::Maths::vec4<float> data)
     {
         activate();
         glUniform4f(glGetUniformLocation(progID, uniformName), data.x, data.y, data.z, data.w);
@@ -269,7 +266,7 @@ namespace Arriba::Graphics
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
         //Create clipspace for framebuffer
-        clipSpaceMatrix = glm::ortho(0.0f, (float)tWidth, 0.0f, (float)tHeight, 0.0f, 10000.0f);
+        clipSpaceMatrix = Arriba::Maths::makeOrtho(0.0f, (float)tWidth, 0.0f, (float)tHeight, 0.0f, 10000.0f);
     }
 
     AdvancedTexture::~AdvancedTexture()
@@ -287,7 +284,7 @@ namespace Arriba::Graphics
         glBindTexture(GL_TEXTURE_2D, texID);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tWidth, tHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glBindTexture(GL_TEXTURE_2D, 0);
-        clipSpaceMatrix = glm::ortho(0.0f, (float)tWidth, 0.0f, (float)tHeight, 0.0f, 10000.0f);
+        clipSpaceMatrix = Arriba::Maths::makeOrtho(0.0f, (float)tWidth, 0.0f, (float)tHeight, 0.0f, 10000.0f);
     }
 
     Renderer::Renderer()
@@ -326,18 +323,18 @@ namespace Arriba::Graphics
         glDeleteBuffers(1, &EBOID);
     }
 
-    glm::mat4 Renderer::getTransformMatrix()
+    Arriba::Maths::mat4<float> Renderer::getTransformMatrix()
     {
-        glm::mat4 transformationMatrix = glm::mat4(1.0f);
-        transformationMatrix = glm::translate(transformationMatrix, glm::vec3(transform->position.x, transform->position.y, transform->position.z));
-        transformationMatrix = glm::rotate(transformationMatrix, glm::radians(transform->rotation.x), glm::vec3(1.0f,0.0f,0.0f));
-        transformationMatrix = glm::rotate(transformationMatrix, glm::radians(transform->rotation.y), glm::vec3(0.0f,1.0f,0.0f));
-        transformationMatrix = glm::rotate(transformationMatrix, glm::radians(transform->rotation.z), glm::vec3(0.0f,0.0f,1.0f));
-        transformationMatrix = glm::scale(transformationMatrix, glm::vec3(transform->scale.x, transform->scale.y, transform->scale.z));
+        Arriba::Maths::mat4<float> transformationMatrix;
+        transformationMatrix = Arriba::Maths::translate(transformationMatrix, Arriba::Maths::vec3<float>{transform->position.x, transform->position.y, transform->position.z});
+        transformationMatrix = Arriba::Maths::rotate(transformationMatrix, Arriba::Maths::radians(transform->rotation.x), Arriba::Maths::vec3<float>{1.0f,0.0f,0.0f});
+        transformationMatrix = Arriba::Maths::rotate(transformationMatrix, Arriba::Maths::radians(transform->rotation.y), Arriba::Maths::vec3<float>{0.0f,1.0f,0.0f});
+        transformationMatrix = Arriba::Maths::rotate(transformationMatrix, Arriba::Maths::radians(transform->rotation.z), Arriba::Maths::vec3<float>{0.0f,0.0f,1.0f});
+        transformationMatrix = Arriba::Maths::scale(transformationMatrix, Arriba::Maths::vec3<float>{transform->scale.x, transform->scale.y, transform->scale.z});
         return parentTransform * transformationMatrix;
     }
 
-    void Renderer::updateParentTransform(glm::mat4 pt)
+    void Renderer::updateParentTransform(Arriba::Maths::mat4<float> pt)
     {
         parentTransform = pt;
     }
@@ -350,9 +347,10 @@ namespace Arriba::Graphics
         glBindVertexArray(VAOID);
 
         //Tranform the verts to the correct location
-        glm::mat4 transformationMatrix = getTransformMatrix();
+        Arriba::Maths::mat4 transformationMatrix = getTransformMatrix();
         unsigned int transformLoc = glGetUniformLocation(thisShader.progID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformationMatrix));
+        //TODO: Make transform matrix upload as an actual float array, this hack may not work on other platforms
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (GLfloat*)&(transformationMatrix));
         //Get the projection matrix
         unsigned int projectionLoc = glGetUniformLocation(thisShader.progID, "projection");
         //Bind any textures
@@ -364,7 +362,8 @@ namespace Arriba::Graphics
             glBindFramebuffer(GL_FRAMEBUFFER, FBOwner->FBO);
             glViewport(0, 0, FBOwner->tWidth, FBOwner->tHeight);
             //Set the transform matrix to the FB's clipspace matrix
-            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(FBOwner->clipSpaceMatrix));
+            //TODO: Make clip space matrix upload as an actual float array, this hack may not work on other platforms
+            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat*)&(FBOwner->clipSpaceMatrix));
             //Draw object and undo changes to OpenGL's state
             glDrawElements(GL_TRIANGLES, sizeof(indexes), GL_UNSIGNED_INT, 0);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -373,7 +372,8 @@ namespace Arriba::Graphics
         //If not beloning to an FBO render as normal
         else 
         {
-            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(clipSpaceMatrix));
+            //TODO: Make clip space matrix upload as an actual float array, this hack may not work on other platforms
+            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat*)&(clipSpaceMatrix));
             glDrawElements(GL_TRIANGLES, sizeof(indexes), GL_UNSIGNED_INT, 0);
         }
         glBindVertexArray(0);
@@ -405,12 +405,12 @@ namespace Arriba::Graphics
         texID = ID;
     }
 
-    void Renderer::setColour(glm::vec4 _colour)
+    void Renderer::setColour(Arriba::Maths::vec4<float> _colour)
     {
         colour = _colour;
     }
 
-    glm::vec4 Renderer::getColour()
+    Arriba::Maths::vec4<float> Renderer::getColour()
     {
         return colour;
     }

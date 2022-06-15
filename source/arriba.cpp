@@ -147,17 +147,17 @@ namespace Arriba
         return behaviours;
     }
 
-    void UIObject::setColour(glm::vec4 _colour)
+    void UIObject::setColour(Arriba::Maths::vec4<float> _colour)
     {
         renderer->setColour(_colour);
     }
 
-    glm::vec4 UIObject::getColour()
+    Arriba::Maths::vec4<float> UIObject::getColour()
     {
         return renderer->getColour();
     }
 
-    glm::mat4 UIObject::getGlobalPos()
+    Arriba::Maths::mat4<float> UIObject::getGlobalPos()
     {
         return renderer->getTransformMatrix();
     }

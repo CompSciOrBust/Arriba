@@ -27,7 +27,7 @@ namespace Arriba::Elements
         bool isTouched = false;
         if(Arriba::Input::touchScreenPressed() && Arriba::Input::touch.start)
         {
-            glm::vec3 pos = glm::vec3(getGlobalPos()[3]);
+            Arriba::Maths::vec3<float> pos = getGlobalPos().col4;
             float touchX = Arriba::Input::touch.pos.x;
             float touchY = Arriba::Input::touch.pos.y;
             isTouched = touchY < getTop() && touchY > getBottom() && touchX < getRight() && touchX > getLeft();
@@ -42,16 +42,16 @@ namespace Arriba::Elements
             else if(Arriba::highlightedObject == this) Arriba::highlightedObject = 0;
         }
         //When highlighted cycle between neutral and highlighted colour
-        glm::vec4 targetColour = Arriba::Colour::neutral;
+        Arriba::Maths::vec4 targetColour = Arriba::Colour::neutral;
         float lerpValue = (sin(Arriba::time*4) + 1) / 2;
         if(Arriba::highlightedObject == this)
         {
-            targetColour = glm::mix(Arriba::Colour::highlightA, Arriba::Colour::highlightB, lerpValue);
+            targetColour = Arriba::Maths::lerp(Arriba::Colour::highlightA, Arriba::Colour::highlightB, lerpValue);
             if(Arriba::Input::buttonDown(HidNpadButton_A) || isTouched) setColour(Arriba::Colour::activatedColour);
         }
         //Slowly transition to the target colour
         float fadeTime = 3 * Arriba::deltaTime;
-        setColour(glm::mix(getColour(), targetColour, fadeTime)); //This should account for delta time but doesn't because it causes bugs
+        setColour(Arriba::Maths::lerp(getColour(), targetColour, fadeTime)); //This should account for delta time but doesn't because it causes bugs
     }
 
     void Button::setText(const char* _text)
@@ -148,7 +148,7 @@ namespace Arriba::Elements
         if(Arriba::Input::touchScreenPressed())
         {
             //Check if list is touched
-            glm::vec3 pos = glm::vec3(getGlobalPos()[3]);
+            Arriba::Maths::vec3<float> pos = getGlobalPos().col4;
             float touchX = Arriba::Input::touch.pos.x;
             float touchY = Arriba::Input::touch.pos.y;
             //Yes the list is touched
@@ -200,23 +200,23 @@ namespace Arriba::Elements
         for (unsigned int i = 0; i < itemCount; i++)
         {
             //If this is not the selected item fade to neutral
-            if(i != selectedIndex) root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),Arriba::Colour::neutral,fadeTime));
+            if(i != selectedIndex) root->getChildren()[i]->setColour(Arriba::Maths::lerp(root->getChildren()[i]->getColour(),Arriba::Colour::neutral,fadeTime));
             else
             {
                 //If this is the selected item but the list is not highlighted fade to highlight b
-                if(Arriba::highlightedObject != this) root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),Arriba::Colour::highlightB,fadeTime));
+                if(Arriba::highlightedObject != this) root->getChildren()[i]->setColour(Arriba::Maths::lerp(root->getChildren()[i]->getColour(),Arriba::Colour::highlightB,fadeTime));
                 else //If this is the selected item pulse between highlight a and highlight b
                 {
                     float lerpValue = (sin(Arriba::time*4) + 1) / 2;
-                    glm::vec4 targetColour = glm::mix(Arriba::Colour::highlightA, Arriba::Colour::highlightB, lerpValue);
+                    Arriba::Maths::vec4 targetColour = Arriba::Maths::lerp(Arriba::Colour::highlightA, Arriba::Colour::highlightB, lerpValue);
                     //If A was pressed or item is newly selected pulse the activated colour
                     if(selectedIndex != lastSelectedIndex || Arriba::Input::buttonDown(HidNpadButton_A)) root->getChildren()[i]->setColour(Arriba::Colour::activatedColour);
-                    else root->getChildren()[i]->setColour(glm::mix(root->getChildren()[i]->getColour(),targetColour,fadeTime));
+                    else root->getChildren()[i]->setColour(Arriba::Maths::lerp(root->getChildren()[i]->getColour(),targetColour,fadeTime));
                 }
             }
         }
         //Set bg colour that is seen when there is not enough items
-        bg->setColour(glm::mix(bg->getColour(), Arriba::Colour::neutral, fadeTime));
+        bg->setColour(Arriba::Maths::lerp(bg->getColour(), Arriba::Colour::neutral, fadeTime));
         lastSelectedIndex = selectedIndex;
         update();
     }

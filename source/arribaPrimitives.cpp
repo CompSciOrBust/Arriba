@@ -80,32 +80,32 @@ namespace Arriba::Primitives
 
     float Quad::getTop()
     {
-        return top + getGlobalPos()[3].y;
+        return top + getGlobalPos().col4.y;
     }
 
     float Quad::getBottom()
     {
-        return bottom + getGlobalPos()[3].y;
+        return bottom + getGlobalPos().col4.y;
     }
 
     float Quad::getLeft()
     {
-        return left + getGlobalPos()[3].x;
+        return left + getGlobalPos().col4.x;
     }
 
     float Quad::getRight()
     {
-        return right + getGlobalPos()[3].x;
+        return right + getGlobalPos().col4.x;
     }
 
     //Is it better to precalculate the dimensions for every character in the font and then just set the VAO?
     Character::Character(Arriba::Graphics::CharInfo character) : Quad(0,0,0,0,Arriba::Graphics::topLeft)
     {
         //Arriba::Graphics::CharInfo character = Arriba::Graphics::getFont(size)[c];
-        float charWidth = character.size[0];
-        float charHeight = character.size[1];
-        float charXOffset = character.bearing[0];
-        float charYOffset = character.bearing[1];
+        float charWidth = character.size.x;
+        float charHeight = character.size.y;
+        float charXOffset = character.bearing.x;
+        float charYOffset = character.bearing.y;
         float verts[20] = {
             (float)charWidth + charXOffset, (float)charHeight   - charYOffset, 0.0f, 1.0f, 1.0f,  // top right
             (float)charWidth + charXOffset, (float)0            - charYOffset, 0.0f, 1.0f, 0.0f, // bottom right
@@ -126,8 +126,8 @@ namespace Arriba::Primitives
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
-        width = character.size[0];
-        height = character.size[1];
+        width = character.size.x;
+        height = character.size.y;
     }
 
     Text::Text(const char* text, int size) : Arriba::Graphics::AdvancedTexture(1,1), Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre)
@@ -153,10 +153,10 @@ namespace Arriba::Primitives
             chars.push_back(child);
             child->setFBOwner(this);
             child->setColour({1,1,1,1});
-            child->transform.position.x = xOffset + character.bearing[0];
+            child->transform.position.x = xOffset + character.bearing.x;
             xOffset += (character.advance >> 6);
-            maxHeight = (character.size[1] > maxHeight) ? character.size[1] : maxHeight;
-            minHeight = (character.size[1] - character.bearing[1] > minHeight) ? character.size[1] - character.bearing[1] : minHeight;
+            maxHeight = (character.size.y > maxHeight) ? character.size.y : maxHeight;
+            minHeight = (character.size.y - character.bearing.y > minHeight) ? character.size.y - character.bearing.y : minHeight;
         }
         //Center the text to the parent
         int xDistance = 0;
@@ -176,7 +176,7 @@ namespace Arriba::Primitives
         update();
     }
 
-    void Text::setColour(glm::vec4 _colour)
+    void Text::setColour(Arriba::Maths::vec4<float> _colour)
     {
         fontColour = _colour;
         renderer->setColour(_colour);

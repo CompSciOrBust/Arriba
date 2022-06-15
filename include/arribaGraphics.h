@@ -3,7 +3,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <arribaMaths.h>
-#include <glm/glm.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 //Includes for HOS
@@ -19,7 +18,7 @@ namespace Arriba::Graphics
     inline GLFWwindow* window;
     inline int windowWidth = 1280, windowHeight = 720;
     inline bool graphicsAreInitialised = false;
-    inline glm::mat4 clipSpaceMatrix;
+    inline Arriba::Maths::mat4<float> clipSpaceMatrix;
     inline FT_Library ft;
     inline FT_Face face;
     inline std::map<int, std::map<char, CharInfo>> charMapMap;
@@ -56,9 +55,9 @@ namespace Arriba::Graphics
             
             void activate();
             void setFloat1(char*, float);
-            void setFloat2(char*, glm::vec2);
-            void setFloat3(char*, glm::vec3);
-            void setFloat4(char*, glm::vec4);
+            void setFloat2(char*, Arriba::Maths::vec2<float>);
+            void setFloat3(char*, Arriba::Maths::vec3<float>);
+            void setFloat4(char*, Arriba::Maths::vec4<float>);
             void updateFragments(const char*, const char*);
             void setProgID(unsigned int);
             unsigned int progID;
@@ -75,7 +74,7 @@ namespace Arriba::Graphics
 
         unsigned int texID;
         unsigned int FBO;
-        glm::mat4 clipSpaceMatrix;
+        Arriba::Maths::mat4<float> clipSpaceMatrix;
         int tHeight;
         int tWidth;
     };
@@ -93,27 +92,27 @@ namespace Arriba::Graphics
                 0, 1, 3, //First triangle
                 1, 2, 3 //Second triangle
             };
-            glm::vec4 colour = {1, 1, 1, 1};
+            Arriba::Maths::vec4<float> colour = {1, 1, 1, 1};
 
             unsigned int VBOID;
             unsigned int VAOID;
             unsigned int EBOID;
             unsigned int texID = defaultTexture;
-            glm::mat4 parentTransform = glm::mat4(1.0f);
+            Arriba::Maths::mat4<float> parentTransform;
 
         public:
             Renderer();
             ~Renderer();
             Shader thisShader = Shader(defaultShaderID);
 
-            glm::mat4 getTransformMatrix();
-            void updateParentTransform(glm::mat4);
+            Arriba::Maths::mat4<float> getTransformMatrix();
+            void updateParentTransform(Arriba::Maths::mat4<float>);
             void renderObject();
             void loadVerts(float*, unsigned int, unsigned int*, unsigned int);
             void updateVerts(float*, unsigned int);
             void setTexture(unsigned int);
-            void setColour(glm::vec4);
-            glm::vec4 getColour();
+            void setColour(Arriba::Maths::vec4<float>);
+            Arriba::Maths::vec4<float> getColour();
 
             Arriba::Maths::Transform *transform;
             Arriba::Graphics::AdvancedTexture* FBOwner = nullptr;
@@ -122,8 +121,8 @@ namespace Arriba::Graphics
     struct CharInfo
     {
         unsigned int texID;
-        glm::ivec2 size;
-        glm::ivec2 bearing;
+        Arriba::Maths::vec2<int> size;
+        Arriba::Maths::vec2<int> bearing;
         unsigned int advance;
     };
 }

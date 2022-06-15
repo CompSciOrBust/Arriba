@@ -49,9 +49,9 @@ namespace Arriba
             std::vector<UIObject*> getChildren();
             std::vector<Behaviour*> getBehaviours();
             virtual void onFrame(){};
-            virtual void setColour(glm::vec4);
-            glm::vec4 getColour();
-            glm::mat4 getGlobalPos();
+            virtual void setColour(Arriba::Maths::vec4<float>);
+            Arriba::Maths::vec4<float> getColour();
+            Arriba::Maths::mat4<float> getGlobalPos();
             void setFBOwner(Arriba::Graphics::AdvancedTexture* fb);
             void destroy();
 
@@ -74,8 +74,8 @@ namespace Arriba
 
 namespace Arriba::Colour
 {
-    inline glm::vec4 neutral = {0.22,0.47,0.93,1};
-    inline glm::vec4 highlightA = {0.1,0.95,0.98,1};
-    inline glm::vec4 highlightB = {0.5,0.85,1,1};
-    inline glm::vec4 activatedColour = {1,1,1,1};
+    inline Arriba::Maths::vec4<float> neutral = {0.22,0.47,0.93,1};
+    inline Arriba::Maths::vec4<float> highlightA = {0.1,0.95,0.98,1};
+    inline Arriba::Maths::vec4<float> highlightB = {0.5,0.85,1,1};
+    inline Arriba::Maths::vec4<float> activatedColour = {1,1,1,1};
 }
