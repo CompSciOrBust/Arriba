@@ -18,11 +18,12 @@ namespace Arriba
         printf("Initializing\n");
         if(Arriba::Graphics::graphicsAreInitialised != true)
         {
+            Arriba::Graphics::initGraphics();
             //On Switch set up hook for docking / undocking
             #ifdef __SWITCH__
+            Arriba::Graphics::dockStatusCallback(AppletHookType_OnOperationMode, nullptr);
             appletHook(&switchDockCookie, Arriba::Graphics::dockStatusCallback, nullptr);
             #endif
-            Arriba::Graphics::initGraphics();
             Arriba::Input::initInput();
             lastFrameTime = armTicksToNs(armGetSystemTick());
         }

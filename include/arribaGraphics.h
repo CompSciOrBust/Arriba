@@ -17,6 +17,7 @@ namespace Arriba::Graphics
     extern bool graphicsAreInitialised;
     inline GLFWwindow* window;
     inline int windowWidth = 1280, windowHeight = 720;
+    inline int renderWidth = 1280, renderHeight = 720;
     inline bool graphicsAreInitialised = false;
     inline Arriba::Maths::mat4<float> clipSpaceMatrix;
     inline FT_Library ft;
@@ -29,6 +30,8 @@ namespace Arriba::Graphics
     void initGraphics();
     std::map<char, CharInfo> getFont(int);
     unsigned int loadShader(const char*, const char*);
+    unsigned int bufferTexture_RGBA(unsigned int width, unsigned int height, unsigned char* data);
+    unsigned int bufferTexture_Red(unsigned int width, unsigned int height, unsigned char* data);
     //HOS functions
     #ifdef __SWITCH__
     void dockStatusCallback(AppletHookType type, void* parameters);

@@ -16,7 +16,7 @@ namespace Arriba::Elements
         //"Temporary" hack to avoid rewriting buttons to use framebuffers
         text->transform.position = {(right + left)/2, (top + bottom)/2, 0};
         //When A pressed call all callbacks
-        if(Arriba::Input::buttonDown(HidNpadButton_A) && Arriba::highlightedObject == this)
+        if(Arriba::Input::buttonDown(Arriba::Input::controllerButton::AButtonSwitch) && Arriba::highlightedObject == this)
         {
             for (unsigned int i = 0; i < callbacks.size(); i++)
             {
@@ -47,7 +47,7 @@ namespace Arriba::Elements
         if(Arriba::highlightedObject == this)
         {
             targetColour = Arriba::Maths::lerp(Arriba::Colour::highlightA, Arriba::Colour::highlightB, lerpValue);
-            if(Arriba::Input::buttonDown(HidNpadButton_A) || isTouched) setColour(Arriba::Colour::activatedColour);
+            if(Arriba::Input::buttonDown(Arriba::Input::controllerButton::AButtonSwitch) || isTouched) setColour(Arriba::Colour::activatedColour);
         }
         //Slowly transition to the target colour
         float fadeTime = 3 * Arriba::deltaTime;
@@ -114,7 +114,7 @@ namespace Arriba::Elements
         if(Arriba::highlightedObject == this)
         {
             //Up pressed
-            if(Arriba::Input::buttonDown(HidNpadButton_Up))
+            if(Arriba::Input::buttonDown(Arriba::Input::controllerButton::DPadUp))
             {
                 if(selectedIndex >= 0 || itemCount * itemHeight < Quad::height)
                 {
@@ -125,7 +125,7 @@ namespace Arriba::Elements
                 else selectedIndex = int(-root->transform.position.y / itemHeight);
             }
             //Down pressed
-            if(Arriba::Input::buttonDown(HidNpadButton_Down))
+            if(Arriba::Input::buttonDown(Arriba::Input::controllerButton::DPadDown))
             {
                 if(selectedIndex >= 0 || itemCount * itemHeight < Quad::height)
                 {
@@ -136,7 +136,7 @@ namespace Arriba::Elements
                 else selectedIndex = int(-root->transform.position.y / itemHeight);
             }
             //A pressed
-            if(Arriba::Input::buttonDown(HidNpadButton_A) && selectedIndex != -1)
+            if(Arriba::Input::buttonDown(Arriba::Input::controllerButton::AButtonSwitch) && selectedIndex != -1)
             {
                 for (unsigned int i = 0; i < callbacks.size(); i++)
                 {
@@ -210,7 +210,7 @@ namespace Arriba::Elements
                     float lerpValue = (sin(Arriba::time*4) + 1) / 2;
                     Arriba::Maths::vec4 targetColour = Arriba::Maths::lerp(Arriba::Colour::highlightA, Arriba::Colour::highlightB, lerpValue);
                     //If A was pressed or item is newly selected pulse the activated colour
-                    if(selectedIndex != lastSelectedIndex || Arriba::Input::buttonDown(HidNpadButton_A)) root->getChildren()[i]->setColour(Arriba::Colour::activatedColour);
+                    if(selectedIndex != lastSelectedIndex || Arriba::Input::buttonDown(Arriba::Input::controllerButton::AButtonSwitch)) root->getChildren()[i]->setColour(Arriba::Colour::activatedColour);
                     else root->getChildren()[i]->setColour(Arriba::Maths::lerp(root->getChildren()[i]->getColour(),targetColour,fadeTime));
                 }
             }

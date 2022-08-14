@@ -29,20 +29,15 @@ namespace Arriba::Graphics
         //Init glad
         if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) printf("Glad init failed\n");
         //Set the view port size and position
-        glViewport(0, 0, windowWidth, windowHeight);
+        glViewport(0, 0, renderWidth, renderHeight);
         //Create the clip space matrix
         clipSpaceMatrix = Arriba::Maths::makeOrtho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f, 0.0f, 10000.0f);
         //Enable blending
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //Generate a blank texture for object use
-        char textureData[] = {255,255,255,255};
-        glGenTextures(1, &defaultTexture);
-        glBindTexture(GL_TEXTURE_2D, defaultTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        //Generate a blank texture for objects use
+        unsigned char textureData[] = {255,255,255,255};
+        defaultTexture = bufferTexture_RGBA(1,1,textureData);
         //Load text shader
         textShaderID = loadShader("romfs:/TextVertex.glsl", "romfs:/TextFragment.glsl");
         defaultShaderID = loadShader("romfs:/VertexDefault.glsl","romfs:/FragmentDefault.glsl");
@@ -77,14 +72,14 @@ namespace Arriba::Graphics
                 //Load the glyph
                 if(FT_Load_Char(face, c, FT_LOAD_RENDER)) printf("Failed to load char\n");
                 //Gen the texture
-                unsigned int texture;
-                glGenTextures(1, &texture);
-                glBindTexture(GL_TEXTURE_2D, texture);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                unsigned int texture = bufferTexture_Red(face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
+                //glGenTextures(1, &texture);
+                //glBindTexture(GL_TEXTURE_2D, texture);
+                //glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+                //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 CharInfo character = {
                     texture,
                     Arriba::Maths::vec2<int>{face->glyph->bitmap.width, face->glyph->bitmap.rows},
@@ -167,22 +162,53 @@ namespace Arriba::Graphics
         return SID;
     }
 
+    unsigned int bufferTexture_RGBA(unsigned int width, unsigned int height, unsigned char* data)
+    {
+        unsigned int textureID = 0;
+        //Generate a texture
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        //Buffer the data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        //Unbind the texture and return
+        glBindTexture(GL_TEXTURE_2D, 0);
+        return textureID;
+    }
+
+    unsigned int bufferTexture_Red(unsigned int width, unsigned int height, unsigned char* data)
+    {
+        unsigned int textureID = 0;
+        //Generate a texture
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        //Buffer the data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        //Unbind the texture and return
+        glBindTexture(GL_TEXTURE_2D, 0);
+        return textureID;
+    }
+
     //HOS Functions
     #ifdef __SWITCH__
     void dockStatusCallback(AppletHookType type, void* parameters)
     {
+        printf("Hook type: %d\n", type);
         switch (appletGetOperationMode())
         {
             case AppletOperationMode_Handheld:
-            windowWidth = 1280;
-            windowHeight = 720;
+            renderWidth = 1280;
+            renderHeight = 720;
             break;
             case AppletOperationMode_Console:
-            windowWidth = 1920;
-            windowHeight = 1080;
+            renderWidth = 1920;
+            renderHeight = 1080;
             break;
-            glViewport(0, 0, windowWidth, windowHeight);
         }
+        glViewport(0, 0, renderWidth, renderHeight);
     }
     #endif
 
@@ -367,7 +393,7 @@ namespace Arriba::Graphics
             //Draw object and undo changes to OpenGL's state
             glDrawElements(GL_TRIANGLES, sizeof(indexes), GL_UNSIGNED_INT, 0);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glViewport(0, 0, windowWidth, windowHeight);
+            glViewport(0, 0, renderWidth, renderHeight);
         }
         //If not beloning to an FBO render as normal
         else 
