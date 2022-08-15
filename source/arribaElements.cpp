@@ -254,7 +254,16 @@ namespace Arriba::Elements
         glClearColor(0.0f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         drawTextureObject(bg);
-        drawTextureObject(root);
+        //Find indexes of list items that are on screen
+        int listItemRenderIndex = -root->transform.position.y / itemHeight;
+        int listItemRenderCount = listItemRenderIndex + height / itemHeight + 1;
+        if(listItemRenderCount > itemCount) listItemRenderCount = itemCount;
+        //Draw on screen list items
+        for (unsigned int i = listItemRenderIndex; i < listItemRenderCount; i++)
+        {
+            root->getChildren()[i]->renderer->updateParentTransform(root->renderer->getTransformMatrix());
+            drawTextureObject(root->getChildren()[i]);
+        }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
