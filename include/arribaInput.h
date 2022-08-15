@@ -52,6 +52,14 @@ namespace Arriba::Input
         int buttonsUp = 0;
     };
 
+    struct AnalogStick
+    {
+        float xPos = 0;
+        float yPos = 0;
+        bool xHeldLastFrame = false;
+        bool yHeldLastFrame = false;
+    };
+
     //Variables needed for HOS
     #ifdef __SWITCH__
     inline PadState pad;
@@ -64,6 +72,8 @@ namespace Arriba::Input
     inline bool touchLastFrame = false;
     inline Touch touch;
     inline ControllerState controller;
+    inline AnalogStick AnalogStickLeft;
+    inline AnalogStick AnalogStickRight;
 
     void initInput();
     void controllerUpdate(ControllerState*);

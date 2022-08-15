@@ -110,7 +110,7 @@ namespace Arriba::Elements
 
     void InertialList::onFrame()
     {
-        //Handle button input
+        //Handle button / stick input
         if(Arriba::highlightedObject == this)
         {
             //Up pressed
@@ -135,6 +135,7 @@ namespace Arriba::Elements
                 //No item is currently selected so select item at bottom of list
                 else selectedIndex = int(-root->transform.position.y / itemHeight);
             }
+
             //A pressed
             if(Arriba::Input::buttonDown(Arriba::Input::controllerButton::AButtonSwitch) && selectedIndex != -1)
             {
@@ -143,7 +144,28 @@ namespace Arriba::Elements
                     callbacks[i](selectedIndex);
                 }
             }
+
+            //Stick movement
+            if(abs(Arriba::Input::AnalogStickLeft.yPos + Arriba::Input::AnalogStickRight.yPos) > 0.1)
+            {
+                //Build up the movement acumulator
+                stickMovementAcumulator += (Arriba::Input::AnalogStickLeft.yPos + Arriba::Input::AnalogStickRight.yPos) * Arriba::deltaTime;
+                if(abs(stickMovementAcumulator) > 0.07)
+                {
+                    if(stickMovementAcumulator > 0) selectedIndex -= 1;
+                    else selectedIndex += 1;
+                    stickMovementAcumulator = 0.0;
+                    if(selectedIndex < 0) selectedIndex = 0;
+                    if(selectedIndex > itemCount-1) selectedIndex = itemCount-1;
+                }
+            }
+            else
+            {
+                //Remove any accumulation
+                stickMovementAcumulator = 0.0;
+            }
         }
+
         //Handle touch input
         if(Arriba::Input::touchScreenPressed())
         {
@@ -171,6 +193,7 @@ namespace Arriba::Elements
             }
             else if(Arriba::highlightedObject == this) highlightedObject = 0;
         }
+
         //Callback for touch finished
         if(Arriba::highlightedObject == this && Arriba::Input::touch.end && selectedIndex != -1)
         {
@@ -179,6 +202,7 @@ namespace Arriba::Elements
                 callbacks[i](selectedIndex);
             }
         }
+
         //If selected index is off screen add inertia to bring it on screen
         if(selectedIndex >= 0)
         {
@@ -186,6 +210,7 @@ namespace Arriba::Elements
             if(selectedIndex * itemHeight + root->transform.position.y < 0) inertia = (selectedIndex * itemHeight + root->transform.position.y) / -6.6665;
             else if((selectedIndex+1) * itemHeight + root->transform.position.y > Quad::height) inertia = ((selectedIndex+1) * itemHeight + root->transform.position.y - Quad::height) / -6.6665;
         }
+
         //Deal with inertia
         root->transform.position.y += inertia;
         inertia *= 0.85;
@@ -215,6 +240,7 @@ namespace Arriba::Elements
                 }
             }
         }
+
         //Set bg colour that is seen when there is not enough items
         bg->setColour(Arriba::Maths::lerp(bg->getColour(), Arriba::Colour::neutral, fadeTime));
         lastSelectedIndex = selectedIndex;

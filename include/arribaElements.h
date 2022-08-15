@@ -31,6 +31,7 @@ namespace Arriba::Elements
             int itemCount = 0;
             int selectedIndex = -1;
             int lastSelectedIndex = -1;
+            float stickMovementAcumulator = 0.0;
 
         public:
             InertialList(int, int, int, int, std::vector<std::string>);

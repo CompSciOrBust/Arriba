@@ -26,6 +26,7 @@ namespace Arriba
             #endif
             Arriba::Input::initInput();
             lastFrameTime = armTicksToNs(armGetSystemTick());
+            appletInitializeGamePlayRecording();
         }
         printf("Init done!\n");
     }

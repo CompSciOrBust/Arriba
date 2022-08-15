@@ -48,7 +48,62 @@ namespace Arriba::Input
         _controller->buttons = _controller->buttons | (controllerButton::RButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_R)));
         _controller->buttons = _controller->buttons | (controllerButton::ZLButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_ZL)));
         _controller->buttons = _controller->buttons | (controllerButton::ZRButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_ZR)));
-        
+
+        //Update analog stick values
+        AnalogStickLeft.xPos = padGetStickPos(&pad, 0).x / (float)JOYSTICK_MAX;
+        AnalogStickLeft.yPos = padGetStickPos(&pad, 0).y / (float)JOYSTICK_MAX;
+        AnalogStickRight.xPos = padGetStickPos(&pad, 1).x / (float)JOYSTICK_MAX;
+        AnalogStickRight.yPos = padGetStickPos(&pad, 1).y / (float)JOYSTICK_MAX;
+
+        //Treat taps as DPAD input
+        //Left stick x
+        if(abs(AnalogStickLeft.xPos) > 0.4)
+        {
+            if(!AnalogStickLeft.xHeldLastFrame && !AnalogStickLeft.yHeldLastFrame)
+            {
+                if(AnalogStickLeft.xPos > 0.) _controller->buttons = _controller->buttons | controllerButton::DPadRight;
+                else _controller->buttons = _controller->buttons | controllerButton::DPadLeft;
+            }
+            AnalogStickLeft.xHeldLastFrame = true;
+        }
+        else AnalogStickLeft.xHeldLastFrame = false;
+
+        //Left stick y
+        if(abs(AnalogStickLeft.yPos) > 0.4)
+        {
+            if(!AnalogStickLeft.yHeldLastFrame && !AnalogStickLeft.yHeldLastFrame)
+            {
+                if(AnalogStickLeft.yPos > 0.) _controller->buttons = _controller->buttons | controllerButton::DPadUp;
+                else _controller->buttons = _controller->buttons | controllerButton::DPadDown;
+            }
+            AnalogStickLeft.yHeldLastFrame = true;
+        }
+        else AnalogStickLeft.yHeldLastFrame = false;
+
+        //Right stick x
+        if(abs(AnalogStickRight.xPos) > 0.4)
+        {
+            if(!AnalogStickRight.xHeldLastFrame && !AnalogStickRight.yHeldLastFrame)
+            {
+                if(AnalogStickRight.xPos > 0.) _controller->buttons = _controller->buttons | controllerButton::DPadRight;
+                else _controller->buttons = _controller->buttons | controllerButton::DPadLeft;
+            }
+            AnalogStickRight.xHeldLastFrame = true;
+        }
+        else AnalogStickRight.xHeldLastFrame = false;
+
+        //Right stick y
+        if(abs(AnalogStickRight.yPos) > 0.4)
+        {
+            if(!AnalogStickRight.yHeldLastFrame && !AnalogStickRight.yHeldLastFrame)
+            {
+                if(AnalogStickRight.yPos > 0.) _controller->buttons = _controller->buttons | controllerButton::DPadUp;
+                else _controller->buttons = _controller->buttons | controllerButton::DPadDown;
+            }
+            AnalogStickRight.yHeldLastFrame = true;
+        }
+        else AnalogStickRight.yHeldLastFrame = false;
+
         kHeld = buttonsDownLastFrame & _controller->buttons;
         kUp = buttonsDownLastFrame & ~_controller->buttons;
         kDown = _controller->buttons & ~buttonsDownLastFrame;
