@@ -18,7 +18,7 @@ namespace Arriba::Input
         DPadLeft = 128,
         optionsRight = 512,
         optionsLeft = 1024,
-        shoulderLeft = 2028,
+        shoulderLeft = 2048,
         shoulderRight = 4096,
         triggerLeft = 8192,
         triggerRight = 16384,
@@ -29,7 +29,7 @@ namespace Arriba::Input
         YButtonSwitch = 8,
         PlusButtonSwitch = 512,
         MinusButtonSwitch = 1024,
-        LButtonSwitch = 2028,
+        LButtonSwitch = 2048,
         RButtonSwitch = 4096,
         ZLButtonSwitch = 8192,
         ZRButtonSwitch = 16384
