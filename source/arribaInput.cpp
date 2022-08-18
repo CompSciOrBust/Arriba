@@ -123,7 +123,7 @@ namespace Arriba::Input
             touch.downTime += Arriba::deltaTime;
             touch.start = !touchLastFrame;
         }
-        else
+        else if (!touchLastFrame)
         {
             touch.downTime = 0;
         }

@@ -24,6 +24,7 @@ namespace Arriba::Elements
     {
         private:
             std::vector<void (*)(int)> callbacks;
+            std::vector<void (*)(int, Arriba::Maths::vec2<float>)> altCallbacks;
             Arriba::Primitives::Quad* root = nullptr;
             Arriba::Primitives::Quad* bg = nullptr;
             float inertia = 0;
@@ -40,5 +41,6 @@ namespace Arriba::Elements
             virtual void onFrame();
             virtual void update();
             void registerCallback(void (*)(int));
+            void registerAltCallback(void (*)(int, Arriba::Maths::vec2<float>));
     };
 }

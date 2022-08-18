@@ -15,6 +15,7 @@ namespace Arriba
     inline double time = 0;
     inline unsigned long lastFrameTime = 0;
     inline UIObject* highlightedObject = NULL;
+    inline unsigned int activeLayer = 0;
     //variables needed for Horizon OS
     #ifdef __SWITCH__
     inline AppletHookCookie switchDockCookie;
@@ -37,6 +38,7 @@ namespace Arriba
             UIObject* parent = nullptr;
             std::vector<UIObject*> children;
             std::vector<Behaviour*> behaviours;
+            int layer = activeLayer;
 
         public:
             UIObject();

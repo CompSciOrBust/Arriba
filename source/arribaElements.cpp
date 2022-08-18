@@ -25,7 +25,7 @@ namespace Arriba::Elements
         }
         //When tapped call all callbacks and highlight self
         bool isTouched = false;
-        if(Arriba::Input::touchScreenPressed() && Arriba::Input::touch.start)
+        if(Arriba::Input::touchScreenPressed() && Arriba::Input::touch.start && activeLayer == layer)
         {
             Arriba::Maths::vec3<float> pos = getGlobalPos().col4;
             float touchX = Arriba::Input::touch.pos.x;
@@ -51,7 +51,7 @@ namespace Arriba::Elements
         }
         //Slowly transition to the target colour
         float fadeTime = 3 * Arriba::deltaTime;
-        setColour(Arriba::Maths::lerp(getColour(), targetColour, fadeTime)); //This should account for delta time but doesn't because it causes bugs
+        setColour(Arriba::Maths::lerp(getColour(), targetColour, fadeTime));
     }
 
     void Button::setText(const char* _text)
@@ -106,6 +106,7 @@ namespace Arriba::Elements
             lastSelectedIndex = 0;
         }
         bg->setDimensions(Quad::width, Quad::height + itemCount * itemHeight, Arriba::Graphics::Pivot::topLeft);
+        bg->setColour(Arriba::Colour::neutral);
     }
 
     void InertialList::onFrame()
@@ -144,6 +145,17 @@ namespace Arriba::Elements
                     callbacks[i](selectedIndex);
                 }
             }
+            //Y pressed
+            if(Arriba::Input::buttonDown(Arriba::Input::controllerButton::YButtonSwitch) && selectedIndex != -1)
+            {
+                for (unsigned int i = 0; i < altCallbacks.size(); i++)
+                {
+                    //The line below is gross but it works
+                    //To get the vec2 we take the x pos of the list, find the text child of the indexed list item, then take its right x value and add it to what we have
+                    //To get the Y value we take the y pos of the list and add the y pos of the currently selected list item and add have of the item height to get the center of the quad
+                    altCallbacks[i](selectedIndex, Arriba::Maths::vec2<float>{transform.position.x + (float)static_cast<Arriba::Primitives::Quad*>(root->getChildren()[selectedIndex]->getChildren()[0])->getRight(), root->transform.position.y + (selectedIndex + 1) * itemHeight + itemHeight * 0.5});
+                }
+            }
 
             //Stick movement
             if(abs(Arriba::Input::AnalogStickLeft.yPos + Arriba::Input::AnalogStickRight.yPos) > 0.1)
@@ -167,7 +179,7 @@ namespace Arriba::Elements
         }
 
         //Handle touch input
-        if(Arriba::Input::touchScreenPressed())
+        if(Arriba::Input::touchScreenPressed() && Arriba::activeLayer == layer)
         {
             //Check if list is touched
             Arriba::Maths::vec3<float> pos = getGlobalPos().col4;
@@ -195,11 +207,23 @@ namespace Arriba::Elements
         }
 
         //Callback for touch finished
-        if(Arriba::highlightedObject == this && Arriba::Input::touch.end && selectedIndex != -1)
+        if(Arriba::highlightedObject == this && Arriba::Input::touch.end && selectedIndex != -1 && activeLayer == layer)
         {
-            for (unsigned int i = 0; i < callbacks.size(); i++)
+            //Short tap callbacks
+            if(Arriba::Input::touch.downTime < 0.5)
             {
-                callbacks[i](selectedIndex);
+                for (unsigned int i = 0; i < callbacks.size(); i++)
+                {
+                    callbacks[i](selectedIndex);
+                }
+            }
+            //Long press callbacks
+            else
+            {
+                for (unsigned int i = 0; i < altCallbacks.size(); i++)
+                {
+                    altCallbacks[i](selectedIndex, Arriba::Input::touch.pos);
+                }
             }
         }
 
@@ -270,5 +294,10 @@ namespace Arriba::Elements
     void InertialList::registerCallback(void (*func)(int))
     {
         callbacks.push_back(func);
+    }
+
+    void InertialList::registerAltCallback(void (*func)(int, Arriba::Maths::vec2<float>))
+    {
+        altCallbacks.push_back(func);
     }
 }

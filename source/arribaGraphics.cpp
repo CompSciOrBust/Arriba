@@ -67,10 +67,10 @@ namespace Arriba::Graphics
             FT_New_Memory_Face(ft, (FT_Byte*)standardFontData.address, standardFontData.size, 0, &face);
             FT_Set_Pixel_Sizes(face, 0, size);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            for (unsigned char c = 0; c < 128; c++)
+            for (unsigned char c = 0; c < 255; c++)
             {
                 //Load the glyph
-                if(FT_Load_Char(face, c, FT_LOAD_RENDER)) printf("Failed to load char\n");
+                if(FT_Load_Char(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) printf("Failed to load char\n");
                 //Gen the texture
                 unsigned int texture = bufferTexture_Red(face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
                 //glGenTextures(1, &texture);
@@ -85,7 +85,7 @@ namespace Arriba::Graphics
                     Arriba::Maths::vec2<int>{face->glyph->bitmap.width, face->glyph->bitmap.rows},
                     Arriba::Maths::vec2<int>{face->glyph->bitmap_left, face->glyph->bitmap_top},
                     static_cast<unsigned int>(face->glyph->advance.x)};
-                charMapT.insert(std::make_pair(c, character));
+                charMapT.insert(std::make_pair(FT_Get_Char_Index(face, c), character));
             }
             //Clean up freetype
             FT_Done_Face(face);
@@ -196,7 +196,6 @@ namespace Arriba::Graphics
     #ifdef __SWITCH__
     void dockStatusCallback(AppletHookType type, void* parameters)
     {
-        printf("Hook type: %d\n", type);
         switch (appletGetOperationMode())
         {
             case AppletOperationMode_Handheld:
