@@ -107,10 +107,10 @@ namespace Arriba::Primitives
         float charXOffset = character.bearing.x;
         float charYOffset = character.bearing.y;
         float verts[20] = {
-            (float)charWidth + charXOffset, (float)charHeight   - charYOffset, 0.0f, 1.0f, 1.0f,  // top right
-            (float)charWidth + charXOffset, (float)0            - charYOffset, 0.0f, 1.0f, 0.0f, // bottom right
-            (float)0         + charXOffset, (float)0            - charYOffset, 0.0f, 0.0f, 0.0f, // bottom left
-            (float)0         + charXOffset, (float)charHeight   - charYOffset, 0.0f, 0.0f, 1.0f  // top left 
+            (float)charWidth, (float)charHeight   - charYOffset, 0.0f, 1.0f, 1.0f,  // top right
+            (float)charWidth, (float)0            - charYOffset, 0.0f, 1.0f, 0.0f, // bottom right
+            (float)0        , (float)0            - charYOffset, 0.0f, 0.0f, 0.0f, // bottom left
+            (float)0        , (float)charHeight   - charYOffset, 0.0f, 0.0f, 1.0f  // top left 
         };
         unsigned int indexes[6] = {
                 0, 1, 3, //First triangle
