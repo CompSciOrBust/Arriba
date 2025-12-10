@@ -21,13 +21,14 @@ inline bool graphicsAreInitialised = false;
 inline Arriba::Maths::mat4<float> clipSpaceMatrix;
 inline FT_Library ft;
 inline FT_Face face;
-inline std::map<int, std::map<char, CharInfo>> charMapMap;
+inline std::map<int, std::map<char32_t, CharInfo>> charMapMap;
 inline unsigned int defaultTexture;
 inline unsigned int textShaderID;
 inline unsigned int defaultShaderID;
 // Functions
 void initGraphics();
-std::map<char, CharInfo> getFont(int size);
+CharInfo getChar(char32_t c, int size);
+std::map<char32_t, CharInfo> getFont(int size);
 unsigned int loadShader(const char* vertexPath, const char* fragmentPath);
 unsigned int bufferTexture_RGBA(unsigned int width, unsigned int height, unsigned char* data);
 unsigned int bufferTexture_Red(unsigned int width, unsigned int height, unsigned char* data);

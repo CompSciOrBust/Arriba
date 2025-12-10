@@ -1,8 +1,9 @@
 #include <arribaElements.h>
+#include <arribaText.h>
 
 namespace Arriba::Elements {
     Button::Button() : Arriba::Primitives::Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre) {
-        text = new Arriba::Primitives::Text("Default", 48);
+        text = new Arriba::Primitives::Text(U"Default", 48);
         text->setParent(this);
         setDimensions(200, 200, Arriba::Graphics::Pivot::centre);
         text->transform.position = {(right + left)/2, (top + bottom)/2, 0};
@@ -47,6 +48,12 @@ namespace Arriba::Elements {
     }
 
     void Button::setText(const char* _text) {
+        char32_t* converted = Arriba::Text::ASCIIToUnicode(_text);
+        setText(converted);
+        free(converted);
+    }
+    
+    void Button::setText(const char32_t* _text) {
         text->setText(_text);
     }
 
@@ -54,7 +61,9 @@ namespace Arriba::Elements {
         callbacks.push_back(func);
     }
 
-    InertialList::InertialList(int _x, int _y, int _width, int _height, std::vector<std::string> strings) : Arriba::Graphics::AdvancedTexture(_width, _height), Arriba::Primitives::Quad(_x, _y, _width, _height, Arriba::Graphics::Pivot::topLeft) {
+    InertialList::InertialList(int _x, int _y, int _width, int _height, std::vector<std::string> strings) : InertialList(_x, _y, _width, _height, Arriba::Text::ASCIIToUnicodeList(strings)) {}
+
+    InertialList::InertialList(int _x, int _y, int _width, int _height, std::vector<std::u32string> strings) : Arriba::Graphics::AdvancedTexture(_width, _height), Arriba::Primitives::Quad(_x, _y, _width, _height, Arriba::Graphics::Pivot::topLeft) {
         renderer->setTexture(texID);
         bg = new Arriba::Primitives::Quad(0, 0, Quad::width, Quad::height, Arriba::Graphics::Pivot::topLeft);
         bg->setColour(Arriba::Colour::neutral);
@@ -70,6 +79,16 @@ namespace Arriba::Elements {
     }
 
     void InertialList::updateStrings(std::vector<std::string> strings) {
+        std::vector<std::u32string> _strings;
+        for (std::string str: strings) {
+            char32_t* converted = Arriba::Text::ASCIIToUnicode(str.c_str());
+            _strings.push_back(converted);
+            free(converted);
+        }
+        updateStrings(_strings);
+    }
+
+    void InertialList::updateStrings(std::vector<std::u32string> strings) {
         root->transform.position.y = 0;
         for (unsigned int i = 0; i < itemCount; i++) {
             root->getChildren()[0]->destroy();

@@ -32,7 +32,9 @@ class Text : public Arriba::Graphics::AdvancedTexture, public Quad {
 
     public:
         Text(const char*, int);
-        void setText(const char*);
+        Text(const char32_t*, int);
+        void setText(const char* text);
+        void setText(const char32_t* text);
         virtual void setColour(Arriba::Maths::vec4<float> _colour);
         virtual void update();
 };

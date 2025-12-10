@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <cstring>
 #include <ft2build.h>
+#include <arribaText.h>
 #include FT_FREETYPE_H
 
 namespace Arriba::Primitives {
@@ -116,19 +117,31 @@ namespace Arriba::Primitives {
     Text::Text(const char* text, int size) : Arriba::Graphics::AdvancedTexture(1, 1), Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre) {
         renderer->setTexture(texID);
         fontSize = size;
+        char32_t* converted = Arriba::Text::ASCIIToUnicode(text);
+        setText(converted);
+        free(converted);
+    }
+
+    Text::Text(const char32_t* text, int size) : Arriba::Graphics::AdvancedTexture(1, 1), Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre) {
+        renderer->setTexture(texID);
+        fontSize = size;
         setText(text);
     }
 
     void Text::setText(const char* text) {
+        char32_t* converted = Arriba::Text::ASCIIToUnicode(text);
+        setText(converted);
+        free(converted);
+    }
+
+    void Text::setText(const char32_t* text) {
         // Vars for storing geometry info
         int xOffset = 0;
         int maxHeight = 0;
         int minHeight = 0;
-        // Cache the char map
-        std::map<char, Arriba::Graphics::CharInfo> charMap = Arriba::Graphics::getFont(fontSize);
         // Spawn the chars
-        for (unsigned int i = 0; i < strnlen(text, 1024); i++) {
-            Arriba::Graphics::CharInfo character = charMap[text[i]];
+        for (unsigned int i = 0; i < std::char_traits<char32_t>::length(text); i++) {
+            Arriba::Graphics::CharInfo character = Arriba::Graphics::getChar(text[i], fontSize);
             Quad* child = new Character(character);
             chars.push_back(child);
             child->setFBOwner(this);
@@ -141,7 +154,7 @@ namespace Arriba::Primitives {
         // Center the text to the parent
         int xDistance = 0;
         int yDistance = maxHeight;
-        for (unsigned int i = 0; i < strnlen(text, 1024); i++) {
+        for (unsigned int i = 0; i < std::char_traits<char32_t>::length(text); i++) {
             chars.at(i)->transform.position.x -= xDistance;
             chars.at(i)->transform.position.y += yDistance;
         }

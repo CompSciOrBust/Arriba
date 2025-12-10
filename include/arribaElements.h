@@ -15,6 +15,7 @@ class Button : public Arriba::Primitives::Quad {
 
         virtual void onFrame();
         void setText(const char* _text);
+        void setText(const char32_t* _text);
         void registerCallback(void (*func)());
 };
 
@@ -33,8 +34,10 @@ class InertialList : public Arriba::Graphics::AdvancedTexture, public Arriba::Pr
 
     public:
         InertialList(int _x, int _y, int _width, int _height, std::vector<std::string> strings);
+        InertialList(int _x, int _y, int _width, int _height, std::vector<std::u32string> strings);
         ~InertialList();
         void updateStrings(std::vector<std::string> strings);
+        void updateStrings(std::vector<std::u32string> strings);
         virtual void onFrame();
         virtual void update();
         void registerCallback(void (*func)(int));

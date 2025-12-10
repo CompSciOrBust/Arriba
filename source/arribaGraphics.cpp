@@ -41,15 +41,61 @@ namespace Arriba::Graphics {
         defaultShaderID = loadShader("romfs:/VertexDefault.glsl", "romfs:/FragmentDefault.glsl");
     }
 
+    CharInfo getChar(char32_t c, int size) {
+        // Get the char map, loading it if it does not
+        std::map<char32_t, CharInfo>* charMapT;
+        std::map<int, std::map<char32_t, CharInfo>>::iterator mapIt = charMapMap.find(size);
+        if (charMapMap.find(size) == charMapMap.end()) {
+            getFont(size);
+            mapIt = charMapMap.find(size);
+        }
+        charMapT = &mapIt->second;
+
+        // If the char map already has the character loaded, return it
+        std::map<char32_t, CharInfo>::iterator charIt = charMapT->find(c);
+        if (charIt != charMapT->end()) {
+            return charIt->second;
+        }
+
+        // At this point the character does not exist, so create it
+        // Load Nintendo's font
+        if (FT_Init_FreeType(&ft)) printf("Failed to init free type\n");
+        plInitialize(PlServiceType_User);
+        PlFontData standardFontData;
+        plGetSharedFontByType(&standardFontData, PlSharedFontType_Standard);
+        FT_New_Memory_Face(ft, reinterpret_cast<FT_Byte*>(standardFontData.address), standardFontData.size, 0, &face);
+        FT_Set_Pixel_Sizes(face, 0, size);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        // Load the glyph
+        if (FT_Load_Glyph(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) printf("Failed to load char\n");
+        // Gen the texture
+        unsigned int texture = bufferTexture_Red(face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
+        CharInfo character = {
+            texture,
+            Arriba::Maths::vec2<int>{face->glyph->bitmap.width, face->glyph->bitmap.rows},
+            Arriba::Maths::vec2<int>{face->glyph->bitmap_left, face->glyph->bitmap_top},
+            static_cast<unsigned int>(face->glyph->advance.x)};
+
+        // Add it to the character map
+        charMapT->insert(std::make_pair(c, character));
+        // Clean up freetype
+        FT_Done_Face(face);
+        FT_Done_FreeType(ft);
+        // Exit PL
+        plExit();
+        return character;
+    }
+
     // Get ready for some cursed shit
-    std::map<char, CharInfo> getFont(int size) {
+    std::map<char32_t, CharInfo> getFont(int size) {
         // Check if the font is loaded
-        std::map<int, std::map<char, CharInfo>>::iterator mapIt = charMapMap.find(size);
+        std::map<int, std::map<char32_t, CharInfo>>::iterator mapIt = charMapMap.find(size);
         // It is so return it
         if (mapIt != charMapMap.end()) {
             return mapIt->second;
         } else {  // Font is not loaded, so load it
-            std::map<char, CharInfo> charMapT;
+            std::map<char32_t, CharInfo> charMapT;
             // Init true type
             if (FT_Init_FreeType(&ft)) printf("Failed to init free type\n");
             // Init pl service
@@ -60,24 +106,17 @@ namespace Arriba::Graphics {
             FT_New_Memory_Face(ft, reinterpret_cast<FT_Byte*>(standardFontData.address), standardFontData.size, 0, &face);
             FT_Set_Pixel_Sizes(face, 0, size);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            for (unsigned char c = 0; c < 255; c++) {
+            for (char32_t c = 0; c < 255; c++) {
                 // Load the glyph
-                if (FT_Load_Char(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) printf("Failed to load char\n");
+                if (FT_Load_Glyph(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) printf("Failed to load char\n");
                 // Gen the texture
                 unsigned int texture = bufferTexture_Red(face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
-                // glGenTextures(1, &texture);
-                // glBindTexture(GL_TEXTURE_2D, texture);
-                // glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
-                // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 CharInfo character = {
                     texture,
                     Arriba::Maths::vec2<int>{face->glyph->bitmap.width, face->glyph->bitmap.rows},
                     Arriba::Maths::vec2<int>{face->glyph->bitmap_left, face->glyph->bitmap_top},
                     static_cast<unsigned int>(face->glyph->advance.x)};
-                charMapT.insert(std::make_pair(FT_Get_Char_Index(face, c), character));
+                charMapT.insert(std::make_pair(c, character));
             }
             // Clean up freetype
             FT_Done_Face(face);
