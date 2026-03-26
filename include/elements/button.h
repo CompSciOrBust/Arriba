@@ -1,3 +1,5 @@
+#pragma once
+
 #include <arribaPrimitives.h>
 
 namespace Arriba::Elements {

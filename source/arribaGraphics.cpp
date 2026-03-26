@@ -94,7 +94,7 @@ namespace Arriba::Graphics {
         // It is so return it
         if (mapIt != charMapMap.end()) {
             return mapIt->second;
-        } else {  // Font is not loaded, so load it
+        } else { // Font is not loaded, so load it
             std::map<char32_t, CharInfo> charMapT;
             // Init true type
             if (FT_Init_FreeType(&ft)) printf("Failed to init free type\n");

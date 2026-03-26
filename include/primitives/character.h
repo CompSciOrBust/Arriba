@@ -1,4 +1,5 @@
 #pragma once
+
 #include <primitives/quad.h>
 
 namespace Arriba::Primitives {
