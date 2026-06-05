@@ -103,33 +103,21 @@ struct mat4 {
 
     // Operators
     mat4<T> operator*(mat4<T> right) {
-        // mat4<T> transposed = transpose();
+        mat4<T> transposed = transpose();
         mat4<T> newMatrix = mat4<T>();
-        // newMatrix.col1 = {transposed.col1 * right.col1, transposed.col1 * right.col2, transposed.col1 * right.col3, transposed.col1 * right.col4};
-        // newMatrix.col2 = {transposed.col2 * right.col1, transposed.col2 * right.col2, transposed.col2 * right.col3, transposed.col2 * right.col4};
-        // newMatrix.col3 = {transposed.col3 * right.col1, transposed.col3 * right.col2, transposed.col3 * right.col3, transposed.col3 * right.col4};
-        // newMatrix.col4 = {transposed.col4 * right.col1, transposed.col4 * right.col2, transposed.col4 * right.col3, transposed.col4 * right.col4};
-        // Is this faster than the above? Needs benchmarked.
-        // Row 1 of new matrix
-        newMatrix.col1.x = {vec4<T>{col1.x, col2.x, col3.x, col4.x} * right.col1};
-        newMatrix.col2.x = {vec4<T>{col1.x, col2.x, col3.x, col4.x} * right.col2};
-        newMatrix.col3.x = {vec4<T>{col1.x, col2.x, col3.x, col4.x} * right.col3};
-        newMatrix.col4.x = {vec4<T>{col1.x, col2.x, col3.x, col4.x} * right.col4};
-        // Row 2 of new matrix
-        newMatrix.col1.y = {vec4<T>{col1.y, col2.y, col3.y, col4.y} * right.col1};
-        newMatrix.col2.y = {vec4<T>{col1.y, col2.y, col3.y, col4.y} * right.col2};
-        newMatrix.col3.y = {vec4<T>{col1.y, col2.y, col3.y, col4.y} * right.col3};
-        newMatrix.col4.y = {vec4<T>{col1.y, col2.y, col3.y, col4.y} * right.col4};
-        // Row 3 of new matrix
-        newMatrix.col1.z = {vec4<T>{col1.z, col2.z, col3.z, col4.z} * right.col1};
-        newMatrix.col2.z = {vec4<T>{col1.z, col2.z, col3.z, col4.z} * right.col2};
-        newMatrix.col3.z = {vec4<T>{col1.z, col2.z, col3.z, col4.z} * right.col3};
-        newMatrix.col4.z = {vec4<T>{col1.z, col2.z, col3.z, col4.z} * right.col4};
-        // Row 4 of new matrix
-        newMatrix.col1.w = {vec4<T>{col1.w, col2.w, col3.w, col4.w} * right.col1};
-        newMatrix.col2.w = {vec4<T>{col1.w, col2.w, col3.w, col4.w} * right.col2};
-        newMatrix.col3.w = {vec4<T>{col1.w, col2.w, col3.w, col4.w} * right.col3};
-        newMatrix.col4.w = {vec4<T>{col1.w, col2.w, col3.w, col4.w} * right.col4};
+        newMatrix.col1 = {transposed.col1 * right.col1, transposed.col2 * right.col1, transposed.col3 * right.col1, transposed.col4 * right.col1};
+        newMatrix.col2 = {transposed.col1 * right.col2, transposed.col2 * right.col2, transposed.col3 * right.col2, transposed.col4 * right.col2};
+        newMatrix.col3 = {transposed.col1 * right.col3, transposed.col2 * right.col3, transposed.col3 * right.col3, transposed.col4 * right.col3};
+        newMatrix.col4 = {transposed.col1 * right.col4, transposed.col2 * right.col4, transposed.col3 * right.col4, transposed.col4 * right.col4};
+        return newMatrix;
+    }
+
+    mat4<T> transpose() {
+        mat4<T> newMatrix;
+        newMatrix.col1 = {col1.x, col2.x, col3.x, col4.x};
+        newMatrix.col2 = {col1.y, col2.y, col3.y, col4.y};
+        newMatrix.col3 = {col1.z, col2.z, col3.z, col4.z};
+        newMatrix.col4 = {col1.w, col2.w, col3.w, col4.w};
         return newMatrix;
     }
 };
