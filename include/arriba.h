@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include <memory>
 #include <string>
 #include <arribaMaths.h>
@@ -11,6 +12,7 @@
 namespace Arriba {
 class UIObject;
 inline std::vector<std::shared_ptr<UIObject>> objectList;
+inline std::unordered_map<std::string, UIObject*> objectNameMap;
 inline double deltaTime = 0;
 inline double time = 0;
 inline unsigned long lastFrameTime = 0;
@@ -37,6 +39,7 @@ class UIObject {
         std::vector<UIObject*> children;
         std::vector<Behaviour*> behaviours;
         int layer = activeLayer;
+        std::string name;
 
     public:
         UIObject();
@@ -45,6 +48,8 @@ class UIObject {
         void setParent(UIObject* newParent);
         void removeChild(int ID);
         void addBehaviour(Behaviour*);
+        void setName(std::string name);
+        std::string getName();
         UIObject* getParent();
         std::vector<UIObject*> getChildren();
         std::vector<Behaviour*> getBehaviours();
@@ -56,7 +61,6 @@ class UIObject {
         void destroy();
 
         Arriba::Maths::Transform transform;
-        std::string name;
         std::string tag;
         int objectID;
         bool enabled = true;
@@ -73,8 +77,8 @@ std::vector<UIObject*> findObjectsByTag(std::string tag);
 }  // namespace Arriba
 
 namespace Arriba::Colour {
-inline Arriba::Maths::vec4<float> neutral = {0.22, 0.47, 0.93, 1};
-inline Arriba::Maths::vec4<float> highlightA = {0.1, 0.95, 0.98, 1};
-inline Arriba::Maths::vec4<float> highlightB = {0.5, 0.85, 1, 1};
-inline Arriba::Maths::vec4<float> activatedColour = {1, 1, 1, 1};
+    inline Arriba::Maths::vec4<float> neutral = {0.22, 0.47, 0.93, 1};
+    inline Arriba::Maths::vec4<float> highlightA = {0.1, 0.95, 0.98, 1};
+    inline Arriba::Maths::vec4<float> highlightB = {0.5, 0.85, 1, 1};
+    inline Arriba::Maths::vec4<float> activatedColour = {1, 1, 1, 1};
 }  // namespace Arriba::Colour

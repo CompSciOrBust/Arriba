@@ -117,6 +117,23 @@ namespace Arriba {
         behaviour->attachToObject(this);
     }
 
+    void UIObject::setName(std::string name) {
+        if (name == "") {
+            if (objectNameMap.find(this->name) != objectNameMap.end()) objectNameMap.erase(this->name);
+            this->name = "";
+            return;
+        }
+        if (objectNameMap.find(this->name) != objectNameMap.end()) objectNameMap.erase(this->name);
+        if (objectNameMap.find(name) != objectNameMap.end()) objectNameMap[name]->setName("");
+        this->name = name;
+        objectNameMap[name] = this;
+        return;
+    }
+
+    std::string UIObject::getName() {
+        return name;
+    }
+
     UIObject* Arriba::UIObject::getParent() {
         return parent;
     }
@@ -153,6 +170,7 @@ namespace Arriba {
         while (getChildren().size() != 0) {
             getChildren()[0]->destroy();
         }
+        setName("");
         for (unsigned int i = 0; i < Arriba::objectList.size(); i++) {
             if (Arriba::objectList[i].get() == this) {
                 Arriba::objectList[i].reset();
@@ -193,9 +211,8 @@ namespace Arriba {
     }
 
     UIObject* findObjectByName(std::string name) {
-        for (size_t i = 0; i < objectList.size(); i++) {
-            if (objectList[i]->name == name) return objectList[i].get();
-        }
+        if (objectNameMap.find(name) != objectNameMap.end()) return objectNameMap[name];
+        return nullptr;
     }
 
     std::vector<UIObject*> findObjectsByTag(std::string tag) {
