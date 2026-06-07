@@ -13,7 +13,6 @@
 namespace Arriba {
 class UIObject;
 inline std::vector<std::shared_ptr<UIObject>> objectList;
-inline std::unordered_map<std::string, UIObject*> objectNameMap;
 inline std::unordered_set<UIObject*> pendingDestroySet;
 inline double deltaTime = 0;
 inline double time = 0;
@@ -42,6 +41,7 @@ class UIObject {
         std::vector<Behaviour*> behaviours;
         int layer = activeLayer;
         std::string name;
+        std::string tag;
 
     public:
         UIObject();
@@ -51,7 +51,9 @@ class UIObject {
         void removeChild(int ID);
         void addBehaviour(Behaviour*);
         void setName(std::string name);
+        void setTag(std::string tag);
         std::string getName();
+        std::string getTag();
         UIObject* getParent();
         std::vector<UIObject*> getChildren();
         std::vector<Behaviour*> getBehaviours();
@@ -63,7 +65,6 @@ class UIObject {
         void destroy();
 
         Arriba::Maths::Transform transform;
-        std::string tag;
         int objectID;
         bool enabled = true;
         std::unique_ptr<Arriba::Graphics::Renderer> renderer;
@@ -75,7 +76,21 @@ void drawFrame();
 void drawFrameActions(UIObject* object);
 void drawTextureObject(UIObject* object);
 UIObject* findObjectByName(std::string name);
-    std::vector<UIObject*> findObjectsByTag(std::string tag);
+std::vector<UIObject*> findObjectsByTag(std::string tag);
+
+template<typename T>
+T* findObjectByName(std::string name) {
+    return static_cast<T*>(findObjectByName(name));
+}
+
+template<typename T>
+std::vector<T*> findObjectsByTag(std::string tag) {
+    std::vector<UIObject*> base = findObjectsByTag(tag);
+    std::vector<T*> result;
+    result.reserve(base.size());
+    for (UIObject* obj : base) result.push_back(static_cast<T*>(obj));
+    return result;
+}
 }  // namespace Arriba
 
 namespace Arriba::Colour {

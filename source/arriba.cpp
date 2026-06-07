@@ -12,6 +12,11 @@
 #endif
 
 namespace Arriba {
+    namespace {
+        std::unordered_map<std::string, UIObject*> objectNameMap;
+        std::unordered_map<std::string, std::vector<UIObject*>> objectTagMap;
+    }
+
     void init() {
         printf("Initializing\n");
         if (Arriba::Graphics::graphicsAreInitialised != true) {
@@ -134,8 +139,33 @@ namespace Arriba {
         return;
     }
 
+    void UIObject::setTag(std::string tag) {
+        if (this->tag != "") {
+            std::vector<UIObject*>* tagVector = &objectTagMap[this->tag];
+            for (auto i = tagVector->begin(); i != tagVector->end(); i++) {
+                if (*i == this) {
+                    tagVector->erase(i);
+                    break;
+                }
+            }
+            if (tagVector->empty()) objectTagMap.erase(this->tag);
+        }
+
+        if (tag != "") {
+            std::vector<UIObject*>* tagVector = &objectTagMap[tag];
+            tagVector->push_back(this);
+        }
+
+        this->tag = tag;
+        return;
+    }
+
     std::string UIObject::getName() {
         return name;
+    }
+
+    std::string UIObject::getTag() {
+        return tag;
     }
 
     UIObject* Arriba::UIObject::getParent() {
@@ -173,6 +203,7 @@ namespace Arriba {
         setParent(nullptr);
         while (getChildren().size() != 0) getChildren()[0]->destroy();
         setName("");
+        setTag("");
         pendingDestroySet.insert(this);
     }
 
@@ -206,10 +237,7 @@ namespace Arriba {
     }
 
     std::vector<UIObject*> findObjectsByTag(std::string tag) {
-        std::vector<UIObject*> list = {};
-        for (size_t i = 0; i < objectList.size(); i++) {
-            if (objectList[i]->tag == tag && !pendingDestroySet.count(objectList[i].get())) list.push_back(objectList[i].get());
-        }
-        return list;
+        if (objectTagMap.find(tag) == objectTagMap.end()) return std::vector<UIObject*>();
+        return objectTagMap[tag];
     }
 }  // namespace Arriba
