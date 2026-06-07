@@ -1,12 +1,13 @@
 #pragma once
 
+#include <functional>
 #include <arribaPrimitives.h>
 
 namespace Arriba::Elements {
     class Button : public Arriba::Primitives::Quad {
         private:
             Arriba::Primitives::Text* text;
-            std::vector<void (*)()> callbacks;
+            std::vector<std::function<void()>> callbacks;
 
         public:
             Button();
@@ -14,6 +15,6 @@ namespace Arriba::Elements {
             virtual void onFrame();
             void setText(const char* _text);
             void setText(const char32_t* _text);
-            void registerCallback(void (*func)());
+            void registerCallback(std::function<void()> func);
     };
 }  //namespace Arriba::Elements
