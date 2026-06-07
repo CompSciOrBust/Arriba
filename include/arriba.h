@@ -26,7 +26,7 @@ inline AppletHookCookie switchDockCookie;
 
 class Behaviour {
     protected:
-    UIObject* object;
+    UIObject* object = nullptr;
     public:
     void attachToObject(UIObject* obj);
     virtual void update() {}

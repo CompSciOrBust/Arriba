@@ -47,9 +47,7 @@ namespace Arriba::Elements {
     }
 
     void Button::setText(const char* text) {
-        char32_t* converted = Arriba::Text::ASCIIToUnicode(text);
-        setText(converted);
-        free(converted);
+        setText(Arriba::Text::ASCIIToUnicode(text).c_str());
     }
 
     void Button::setText(const char32_t* text) {

@@ -1,4 +1,4 @@
-#include <Primitives/character.h>
+#include <primitives/character.h>
 
 namespace Arriba::Primitives {
     // Is it better to precalculate the dimensions for every character in the font and then just set the VAO?

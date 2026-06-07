@@ -23,9 +23,7 @@ namespace Arriba::Elements {
     void InertialList::updateStrings(const std::vector<std::string>& strings) {
         std::vector<std::u32string> _strings;
         for (const std::string& str : strings) {
-            char32_t* converted = Arriba::Text::ASCIIToUnicode(str.c_str());
-            _strings.push_back(converted);
-            free(converted);
+            _strings.push_back(Arriba::Text::ASCIIToUnicode(str.c_str()));
         }
         updateStrings(_strings);
     }

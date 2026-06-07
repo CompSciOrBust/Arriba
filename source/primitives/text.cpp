@@ -6,9 +6,7 @@ namespace Arriba::Primitives {
     Text::Text(const char* text, int size) : Arriba::Graphics::AdvancedTexture(1, 1), Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre) {
         renderer->setTexture(texID);
         fontSize = size;
-        char32_t* converted = Arriba::Text::ASCIIToUnicode(text);
-        setText(converted);
-        free(converted);
+        setText(Arriba::Text::ASCIIToUnicode(text).c_str());
     }
 
     Text::Text(const char32_t* text, int size) : Arriba::Graphics::AdvancedTexture(1, 1), Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre) {
@@ -18,9 +16,7 @@ namespace Arriba::Primitives {
     }
 
     void Text::setText(const char* text) {
-        char32_t* converted = Arriba::Text::ASCIIToUnicode(text);
-        setText(converted);
-        free(converted);
+        setText(Arriba::Text::ASCIIToUnicode(text).c_str());
     }
 
     void Text::setText(const char32_t* text) {
