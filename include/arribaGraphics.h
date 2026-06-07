@@ -50,8 +50,8 @@ class Shader {
         bool sharedShader = false;
 
     public:
-        Shader(const char* vertexPath, const char* fragmentPath);
-        Shader(unsigned int _ID);
+        Shader(const char* vertexPath = "romfs:/VertexDefault.glsl", const char* fragmentPath = "romfs:/FragmentDefault.glsl");
+        Shader(unsigned int id);
         ~Shader();
 
         void activate();
@@ -60,7 +60,7 @@ class Shader {
         void setFloat3(const char* uniformName, Arriba::Maths::vec3<float> data);
         void setFloat4(const char* uniformName, Arriba::Maths::vec4<float> data);
         void updateFragments(const char* vertexPath, const char* fragmentPath);
-        void setProgID(unsigned int _ID);
+        void setProgID(unsigned int id);
         unsigned int progID;
 };
 
@@ -113,7 +113,7 @@ class Renderer {
         void setColour(const Arriba::Maths::vec4<float>& colour);
         Arriba::Maths::vec4<float> getColour();
 
-        Arriba::Maths::Transform* transform;
+        Arriba::Maths::Transform* transform = nullptr;
         Arriba::Graphics::AdvancedTexture* FBOwner = nullptr;
 };
 

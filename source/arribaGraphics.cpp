@@ -216,13 +216,13 @@ namespace Arriba::Graphics {
     }
     #endif
 
-    Shader::Shader(const char* vertexPath = "romfs:/VertexDefault.glsl", const char* fragmentPath = "romfs:/FragmentDefault.glsl") {
+    Shader::Shader(const char* vertexPath, const char* fragmentPath) {
         updateFragments(vertexPath, fragmentPath);
     }
 
-    Shader::Shader(unsigned int _ID) {
+    Shader::Shader(unsigned int id) {
         sharedShader = true;
-        progID = _ID;
+        progID = id;
     }
 
     Shader::~Shader() {
@@ -258,9 +258,9 @@ namespace Arriba::Graphics {
         progID = loadShader(vertexPath, fragmentPath);
     }
 
-    void Shader::setProgID(unsigned int _ID) {
+    void Shader::setProgID(unsigned int id) {
         if (!sharedShader) glDeleteProgram(progID);
-        progID = _ID;
+        progID = id;
         sharedShader = true;
     }
 
