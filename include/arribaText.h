@@ -5,5 +5,5 @@
 
 namespace Arriba::Text {
     char32_t* ASCIIToUnicode(const char* text);
-    std::vector<std::u32string> ASCIIToUnicodeList(std::vector<std::string> strings);
+    std::vector<std::u32string> ASCIIToUnicodeList(const std::vector<std::string>& strings);
 } // namespace Arriba::Text

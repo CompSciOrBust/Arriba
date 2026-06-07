@@ -3,9 +3,9 @@
 #include <arribaText.h>
 
 namespace Arriba::Elements {
-    InertialList::InertialList(int _x, int _y, int _width, int _height, const std::vector<std::string>& strings) : InertialList(_x, _y, _width, _height, Arriba::Text::ASCIIToUnicodeList(strings)) {}
+    InertialList::InertialList(int x, int y, int width, int height, const std::vector<std::string>& strings) : InertialList(x, y, width, height, Arriba::Text::ASCIIToUnicodeList(strings)) {}
 
-    InertialList::InertialList(int _x, int _y, int _width, int _height, const std::vector<std::u32string>& strings) : Arriba::Graphics::AdvancedTexture(_width, _height), Arriba::Primitives::Quad(_x, _y, _width, _height, Arriba::Graphics::Pivot::topLeft) {
+    InertialList::InertialList(int x, int y, int width, int height, const std::vector<std::u32string>& strings) : Arriba::Graphics::AdvancedTexture(width, height), Arriba::Primitives::Quad(x, y, width, height, Arriba::Graphics::Pivot::topLeft) {
         renderer->setTexture(texID);
         bg = new Arriba::Primitives::Quad(0, 0, Quad::width, Quad::height, Arriba::Graphics::Pivot::topLeft);
         bg->setColour(Arriba::Colour::neutral);

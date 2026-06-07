@@ -1,15 +1,15 @@
 #include <primitives/quad.h>
 
 namespace Arriba::Primitives {
-    Quad::Quad(int _x, int _y, int _width, int _height, Arriba::Graphics::Pivot pivotMode) {
-        this->transform.position.x = _x;
-        this->transform.position.y = _y;
-        if ((_width != 0) && (_height != 0)) setDimensions(_width, _height, pivotMode);
+    Quad::Quad(int x, int y, int width, int height, Arriba::Graphics::Pivot pivotMode) {
+        this->transform.position.x = x;
+        this->transform.position.y = y;
+        if ((width != 0) && (height != 0)) setDimensions(width, height, pivotMode);
     }
 
-    void Quad::setDimensions(int _width, int _height, Arriba::Graphics::Pivot pivotMode) {
-        width = _width;
-        height = _height;
+    void Quad::setDimensions(int width, int height, Arriba::Graphics::Pivot pivotMode) {
+        this->width = width;
+        this->height = height;
 
         if (pivotMode == Arriba::Graphics::centre) {
             left = -width/2;

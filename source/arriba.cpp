@@ -126,7 +126,7 @@ namespace Arriba {
         behaviour->attachToObject(this);
     }
 
-    void UIObject::setName(std::string name) {
+    void UIObject::setName(const std::string& name) {
         if (name == "") {
             if (objectNameMap.find(this->name) != objectNameMap.end()) objectNameMap.erase(this->name);
             this->name = "";
@@ -139,7 +139,7 @@ namespace Arriba {
         return;
     }
 
-    void UIObject::setTag(std::string tag) {
+    void UIObject::setTag(const std::string& tag) {
         if (this->tag != "") {
             std::vector<UIObject*>* tagVector = &objectTagMap[this->tag];
             for (auto i = tagVector->begin(); i != tagVector->end(); i++) {
@@ -180,8 +180,8 @@ namespace Arriba {
         return behaviours;
     }
 
-    void UIObject::setColour(Arriba::Maths::vec4<float> _colour) {
-        renderer->setColour(_colour);
+    void UIObject::setColour(const Arriba::Maths::vec4<float>& colour) {
+        renderer->setColour(colour);
     }
 
     Arriba::Maths::vec4<float> UIObject::getColour() {
@@ -231,12 +231,12 @@ namespace Arriba {
         // renderer.release();
     }
 
-    UIObject* findObjectByName(std::string name) {
+    UIObject* findObjectByName(const std::string& name) {
         if (objectNameMap.find(name) != objectNameMap.end()) return objectNameMap[name];
         return nullptr;
     }
 
-    std::vector<UIObject*> findObjectsByTag(std::string tag) {
+    std::vector<UIObject*> findObjectsByTag(const std::string& tag) {
         if (objectTagMap.find(tag) == objectTagMap.end()) return std::vector<UIObject*>();
         return objectTagMap[tag];
     }

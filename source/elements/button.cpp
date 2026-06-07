@@ -46,14 +46,14 @@ namespace Arriba::Elements {
         setColour(Arriba::Maths::lerp(getColour(), targetColour, fadeTime));
     }
 
-    void Button::setText(const char* _text) {
-        char32_t* converted = Arriba::Text::ASCIIToUnicode(_text);
+    void Button::setText(const char* text) {
+        char32_t* converted = Arriba::Text::ASCIIToUnicode(text);
         setText(converted);
         free(converted);
     }
-    
-    void Button::setText(const char32_t* _text) {
-        text->setText(_text);
+
+    void Button::setText(const char32_t* text) {
+        this->text->setText(text);
     }
 
     void Button::registerCallback(std::function<void()> func) {

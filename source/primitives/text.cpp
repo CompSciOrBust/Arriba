@@ -57,9 +57,9 @@ namespace Arriba::Primitives {
         update();
     }
 
-    void Text::setColour(Arriba::Maths::vec4<float> _colour) {
-        fontColour = _colour;
-        renderer->setColour(_colour);
+    void Text::setColour(const Arriba::Maths::vec4<float>& colour) {
+        fontColour = colour;
+        renderer->setColour(colour);
     }
 
     void Text::update() {

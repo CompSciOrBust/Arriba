@@ -9,9 +9,9 @@ namespace Arriba::Primitives {
         
         public:
         int width, height;
-        Quad(int _x, int _y, int _width, int _height, Arriba::Graphics::Pivot pivotMode);
-        
-        void setDimensions(int _width, int _height, Arriba::Graphics::Pivot pivotMode);
+        Quad(int x, int y, int width, int height, Arriba::Graphics::Pivot pivotMode);
+
+        void setDimensions(int width, int height, Arriba::Graphics::Pivot pivotMode);
         float getTop();
         float getBottom();
         float getLeft();

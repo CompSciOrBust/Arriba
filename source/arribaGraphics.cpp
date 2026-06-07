@@ -233,22 +233,22 @@ namespace Arriba::Graphics {
         glUseProgram(progID);
     }
 
-    void Shader::setFloat1(char* uniformName, float data) {
+    void Shader::setFloat1(const char* uniformName, float data) {
         activate();
         glUniform1f(glGetUniformLocation(progID, uniformName), data);
     }
 
-    void Shader::setFloat2(char* uniformName, Arriba::Maths::vec2<float> data) {
+    void Shader::setFloat2(const char* uniformName, Arriba::Maths::vec2<float> data) {
         activate();
         glUniform2f(glGetUniformLocation(progID, uniformName), data.x, data.y);
     }
 
-    void Shader::setFloat3(char* uniformName, Arriba::Maths::vec3<float> data) {
+    void Shader::setFloat3(const char* uniformName, Arriba::Maths::vec3<float> data) {
         activate();
         glUniform3f(glGetUniformLocation(progID, uniformName), data.x, data.y, data.z);
     }
 
-    void Shader::setFloat4(char* uniformName, Arriba::Maths::vec4<float> data) {
+    void Shader::setFloat4(const char* uniformName, Arriba::Maths::vec4<float> data) {
         activate();
         glUniform4f(glGetUniformLocation(progID, uniformName), data.x, data.y, data.z, data.w);
     }
@@ -264,9 +264,9 @@ namespace Arriba::Graphics {
         sharedShader = true;
     }
 
-    AdvancedTexture::AdvancedTexture(int _width, int _height) {
-        tWidth = _width;
-        tHeight = _height;
+    AdvancedTexture::AdvancedTexture(int width, int height) {
+        tWidth = width;
+        tHeight = height;
 
         glGenFramebuffers(1, &FBO);
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -275,7 +275,7 @@ namespace Arriba::Graphics {
         glBindTexture(GL_TEXTURE_2D, texID);
 
         // Note we don't write data to the texture since we're rendering to it from the frame buffer
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tWidth, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tWidth, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         
@@ -294,9 +294,9 @@ namespace Arriba::Graphics {
         glDeleteTextures(1, &texID);
     }
 
-    void AdvancedTexture::resize(int _width, int _height) {
-        tWidth = _width;
-        tHeight = _height;
+    void AdvancedTexture::resize(int width, int height) {
+        tWidth = width;
+        tHeight = height;
         glBindTexture(GL_TEXTURE_2D, texID);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tWidth, tHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -353,7 +353,7 @@ namespace Arriba::Graphics {
         return parentTransform * transformationMatrix;
     }
 
-    void Renderer::updateParentTransform(Arriba::Maths::mat4<float> pt) {
+    void Renderer::updateParentTransform(const Arriba::Maths::mat4<float>& pt) {
         parentTransform = pt;
     }
 
@@ -388,19 +388,19 @@ namespace Arriba::Graphics {
         glBindVertexArray(0);
     }
 
-    void Renderer::loadVerts(float* _verts, unsigned int vertSize, unsigned int* _indexes, unsigned int indexesSize) {
+    void Renderer::loadVerts(float* verts, unsigned int vertSize, unsigned int* indexes, unsigned int indexesSize) {
         glBindVertexArray(VAOID);
         
         glBindBuffer(GL_ARRAY_BUFFER, VBOID);
-        glBufferData(GL_ARRAY_BUFFER, vertSize, _verts, GL_DYNAMIC_DRAW);
-        
+        glBufferData(GL_ARRAY_BUFFER, vertSize, verts, GL_DYNAMIC_DRAW);
+
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOID);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexesSize, _indexes, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexesSize, indexes, GL_DYNAMIC_DRAW);
     }
 
-    void Renderer::updateVerts(float* _verts, unsigned int vertSize) {
+    void Renderer::updateVerts(float* verts, unsigned int vertSize) {
         glBindVertexArray(VAOID);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, vertSize, _verts);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertSize, verts);
     }
 
     void Renderer::setTexture(unsigned int ID) {
@@ -408,8 +408,8 @@ namespace Arriba::Graphics {
         texID = ID;
     }
 
-    void Renderer::setColour(Arriba::Maths::vec4<float> _colour) {
-        colour = _colour;
+    void Renderer::setColour(const Arriba::Maths::vec4<float>& colour) {
+        this->colour = colour;
     }
 
     Arriba::Maths::vec4<float> Renderer::getColour() {

@@ -28,7 +28,7 @@ class Behaviour {
     protected:
     UIObject* object;
     public:
-    void attachToObject(UIObject*);
+    void attachToObject(UIObject* obj);
     virtual void update() {}
     virtual void onEnable() {}
     virtual void onDisable() {}
@@ -49,16 +49,16 @@ class UIObject {
 
         void setParent(UIObject* newParent);
         void removeChild(int ID);
-        void addBehaviour(Behaviour*);
-        void setName(std::string name);
-        void setTag(std::string tag);
+        void addBehaviour(Behaviour* behaviour);
+        void setName(const std::string& name);
+        void setTag(const std::string& tag);
         std::string getName();
         std::string getTag();
         UIObject* getParent();
         std::vector<UIObject*> getChildren();
         std::vector<Behaviour*> getBehaviours();
         virtual void onFrame() {}
-        virtual void setColour(Arriba::Maths::vec4<float>);
+        virtual void setColour(const Arriba::Maths::vec4<float>& colour);
         Arriba::Maths::vec4<float> getColour();
         Arriba::Maths::mat4<float> getGlobalPos();
         void setFBOwner(Arriba::Graphics::AdvancedTexture* fb);
@@ -75,16 +75,16 @@ void exit();
 void drawFrame();
 void drawFrameActions(UIObject* object);
 void drawTextureObject(UIObject* object);
-UIObject* findObjectByName(std::string name);
-std::vector<UIObject*> findObjectsByTag(std::string tag);
+UIObject* findObjectByName(const std::string& name);
+std::vector<UIObject*> findObjectsByTag(const std::string& tag);
 
 template<typename T>
-T* findObjectByName(std::string name) {
+T* findObjectByName(const std::string& name) {
     return static_cast<T*>(findObjectByName(name));
 }
 
 template<typename T>
-std::vector<T*> findObjectsByTag(std::string tag) {
+std::vector<T*> findObjectsByTag(const std::string& tag) {
     std::vector<UIObject*> base = findObjectsByTag(tag);
     std::vector<T*> result;
     result.reserve(base.size());

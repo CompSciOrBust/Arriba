@@ -74,7 +74,7 @@ inline AnalogStick AnalogStickLeft;
 inline AnalogStick AnalogStickRight;
 
 void initInput();
-void controllerUpdate(ControllerState* _controller);
+void controllerUpdate(ControllerState* controller);
 void updateHID();
 bool buttonHeld(controllerButton button);
 bool buttonDown(controllerButton button);

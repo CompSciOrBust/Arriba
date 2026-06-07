@@ -21,13 +21,13 @@ namespace Arriba::Elements {
             float stickMovementAccumulator = 0.0;
 
         public:
-            InertialList(int _x, int _y, int _width, int _height, const std::vector<std::string>& strings);
-            InertialList(int _x, int _y, int _width, int _height, const std::vector<std::u32string>& strings);
+            InertialList(int x, int y, int width, int height, const std::vector<std::string>& strings);
+            InertialList(int x, int y, int width, int height, const std::vector<std::u32string>& strings);
             ~InertialList();
             void updateStrings(const std::vector<std::string>& strings);
             void updateStrings(const std::vector<std::u32string>& strings);
-            virtual void onFrame();
-            virtual void update();
+            void onFrame() override;
+            void update() override;
             void registerCallback(std::function<void(int)> func);
             void registerAltCallback(std::function<void(int, Arriba::Maths::vec2<float>)> func);
     };

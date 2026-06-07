@@ -55,10 +55,10 @@ class Shader {
         ~Shader();
 
         void activate();
-        void setFloat1(char* uniformName, float data);
-        void setFloat2(char* uniformName, Arriba::Maths::vec2<float> data);
-        void setFloat3(char* uniformName, Arriba::Maths::vec3<float> data);
-        void setFloat4(char* uniformName, Arriba::Maths::vec4<float> data);
+        void setFloat1(const char* uniformName, float data);
+        void setFloat2(const char* uniformName, Arriba::Maths::vec2<float> data);
+        void setFloat3(const char* uniformName, Arriba::Maths::vec3<float> data);
+        void setFloat4(const char* uniformName, Arriba::Maths::vec4<float> data);
         void updateFragments(const char* vertexPath, const char* fragmentPath);
         void setProgID(unsigned int _ID);
         unsigned int progID;
@@ -66,10 +66,10 @@ class Shader {
 
 class AdvancedTexture {
     public:
-    AdvancedTexture(int _width, int _height);
+    AdvancedTexture(int width, int height);
     ~AdvancedTexture();
 
-    void resize(int _width, int _height);
+    void resize(int width, int height);
     virtual void update() {}
 
     unsigned int texID;
@@ -105,15 +105,15 @@ class Renderer {
         Shader thisShader = Shader(defaultShaderID);
 
         Arriba::Maths::mat4<float> getTransformMatrix();
-        void updateParentTransform(Arriba::Maths::mat4<float> pt);
+        void updateParentTransform(const Arriba::Maths::mat4<float>& pt);
         void renderObject();
-        void loadVerts(float* _verts, unsigned int vertSize, unsigned int* _indexes, unsigned int indexesSize);
-        void updateVerts(float* _verts, unsigned int vertSize);
+        void loadVerts(float* verts, unsigned int vertSize, unsigned int* indexes, unsigned int indexesSize);
+        void updateVerts(float* verts, unsigned int vertSize);
         void setTexture(unsigned int ID);
-        void setColour(Arriba::Maths::vec4<float> _colour);
+        void setColour(const Arriba::Maths::vec4<float>& colour);
         Arriba::Maths::vec4<float> getColour();
 
-        Arriba::Maths::Transform *transform;
+        Arriba::Maths::Transform* transform;
         Arriba::Graphics::AdvancedTexture* FBOwner = nullptr;
 };
 

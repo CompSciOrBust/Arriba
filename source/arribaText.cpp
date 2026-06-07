@@ -13,9 +13,9 @@ namespace Arriba::Text {
         return converted;
     }
 
-    std::vector<std::u32string> ASCIIToUnicodeList(std::vector<std::string> strings) {
+    std::vector<std::u32string> ASCIIToUnicodeList(const std::vector<std::string>& strings) {
         std::vector<std::u32string> _strings = {};
-        for (std::string str: strings) {
+        for (const std::string& str : strings) {
             char32_t* converted = Arriba::Text::ASCIIToUnicode(str.c_str());
             _strings.push_back(converted);
             free(converted);

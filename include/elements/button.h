@@ -12,9 +12,9 @@ namespace Arriba::Elements {
         public:
             Button();
 
-            virtual void onFrame();
-            void setText(const char* _text);
-            void setText(const char32_t* _text);
+            void onFrame() override;
+            void setText(const char* text);
+            void setText(const char32_t* text);
             void registerCallback(std::function<void()> func);
     };
 }  //namespace Arriba::Elements

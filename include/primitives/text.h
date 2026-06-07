@@ -10,14 +10,14 @@ namespace Arriba::Primitives {
             int fontSize;
             Arriba::Maths::vec4<float> fontColour = {0, 0, 0, 1};
             // Keep track of characters for memory management
-            std::vector<Arriba::UIObject *> chars;
+            std::vector<Arriba::UIObject*> chars;
 
         public:
-            Text(const char*, int);
-            Text(const char32_t*, int);
+            Text(const char* text, int size);
+            Text(const char32_t* text, int size);
             void setText(const char* text);
             void setText(const char32_t* text);
-            virtual void setColour(Arriba::Maths::vec4<float> _colour);
-            virtual void update();
+            void setColour(const Arriba::Maths::vec4<float>& colour) override;
+            void update() override;
     };
 }  // namespace Arriba::Primitives
