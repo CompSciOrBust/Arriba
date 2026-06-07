@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
 #include <string>
 #include <arribaMaths.h>
@@ -13,10 +14,11 @@ namespace Arriba {
 class UIObject;
 inline std::vector<std::shared_ptr<UIObject>> objectList;
 inline std::unordered_map<std::string, UIObject*> objectNameMap;
+inline std::unordered_set<UIObject*> pendingDestroySet;
 inline double deltaTime = 0;
 inline double time = 0;
 inline unsigned long lastFrameTime = 0;
-inline UIObject* highlightedObject = NULL;
+inline UIObject* highlightedObject = nullptr;
 inline unsigned int activeLayer = 0;
 // variables needed for Horizon OS
 #ifdef __SWITCH__
@@ -73,7 +75,7 @@ void drawFrame();
 void drawFrameActions(UIObject* object);
 void drawTextureObject(UIObject* object);
 UIObject* findObjectByName(std::string name);
-std::vector<UIObject*> findObjectsByTag(std::string tag);
+    std::vector<UIObject*> findObjectsByTag(std::string tag);
 }  // namespace Arriba
 
 namespace Arriba::Colour {

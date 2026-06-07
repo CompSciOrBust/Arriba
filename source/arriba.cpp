@@ -15,8 +15,8 @@ namespace Arriba {
     void init() {
         printf("Initializing\n");
         if (Arriba::Graphics::graphicsAreInitialised != true) {
+            srand(::time(NULL));
             Arriba::Graphics::initGraphics();
-            // On Switch set up hook for docking / undocking
             #ifdef __SWITCH__
             Arriba::Graphics::dockStatusCallback(AppletHookType_OnOperationMode, nullptr);
             appletHook(&switchDockCookie, Arriba::Graphics::dockStatusCallback, nullptr);
@@ -28,59 +28,64 @@ namespace Arriba {
         printf("Init done!\n");
     }
 
-    // This only exists because AtlasNX people bullied me
     void exit() {
-        // Delete all loaded objects
-        while (objectList.size() != 0) {
-            objectList[0]->destroy();
-        }
-        // Destroy default shaders
+        objectList.clear();
+        
         glDeleteProgram(Arriba::Graphics::defaultShaderID);
         glDeleteProgram(Arriba::Graphics::textShaderID);
-        // Kill GLFW
+        
         glfwTerminate();
-        // On switch unhook dock event
+        
         #ifdef __SWITCH__
             appletUnhook(&switchDockCookie);
         #endif
     }
 
     void drawFrame() {
-        // Prevent force closing the app
+        #ifdef __SWITCH__
         appletLockExit();
-        // Calculate delta time
+        #endif
+
         double msSinceLastFrame = (armTicksToNs(armGetSystemTick()) - lastFrameTime) / 1000000;
         deltaTime = msSinceLastFrame / 1000;
         time += deltaTime;
         lastFrameTime = armTicksToNs(armGetSystemTick());
-        // Update input
+
         Arriba::Input::updateHID();
-        // Clear the screen
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        // Render each game object
+
         for (size_t i = 0; i < objectList.size(); i++) {
-            // Skip if has parent
             if (objectList[i]->getParent() != nullptr) continue;
+            if (pendingDestroySet.count(objectList[i].get())) continue;
             drawFrameActions(objectList[i].get());
         }
-        // Update screen
+
         glfwSwapBuffers(Arriba::Graphics::window);
         glfwPollEvents();
-        // Allow force closing the app
+
+        for (int i = objectList.size() - 1; i >= 0; i--) {
+            if (pendingDestroySet.count(objectList[i].get())) objectList.erase(objectList.begin() + i);
+        }
+        pendingDestroySet.clear();
+
+        #ifdef __SWITCH__
         appletUnlockExit();
+        #endif
     }
 
     void drawFrameActions(UIObject* object) {
-        // Skip if disabled or belongs to framebuffer
         if (object->enabled == false || object->renderer->FBOwner != nullptr) return;
-        object->onFrame();  // Perform actions
-        // Call update on each behaviour
+
+        object->onFrame();
+
         for (unsigned int i = 0; i < object->getBehaviours().size(); i++) {
             object->getBehaviours()[i]->update();
         }
-        object->renderer->renderObject();  // Render
-        // Do the same for each child
+
+        object->renderer->renderObject();
+
         for (unsigned int i = 0; i < object->getChildren().size(); i++) {
             object->getChildren()[i]->renderer->updateParentTransform(object->renderer->getTransformMatrix());
             drawFrameActions(object->getChildren()[i]);
@@ -88,11 +93,10 @@ namespace Arriba {
     }
 
     void drawTextureObject(UIObject* object) {
-        // Skip if disabled
         if (object->enabled == false) return;
-        // Render object
+        
         object->renderer->renderObject();
-        // Do same for all children
+        
         for (unsigned int i = 0; i < object->getChildren().size(); i++) {
             object->getChildren()[i]->renderer->updateParentTransform(object->renderer->getTransformMatrix());
             drawTextureObject(object->getChildren()[i]);
@@ -167,41 +171,27 @@ namespace Arriba {
 
     void UIObject::destroy() {
         setParent(nullptr);
-        while (getChildren().size() != 0) {
-            getChildren()[0]->destroy();
-        }
+        while (getChildren().size() != 0) getChildren()[0]->destroy();
         setName("");
-        for (unsigned int i = 0; i < Arriba::objectList.size(); i++) {
-            if (Arriba::objectList[i].get() == this) {
-                Arriba::objectList[i].reset();
-                Arriba::objectList.erase(Arriba::objectList.begin() + i);
-                break;
-            }
-        }
+        pendingDestroySet.insert(this);
     }
 
     void UIObject::setParent(Arriba::UIObject* newParent) {
-        // Remove self from parent's children
         if (parent) parent->removeChild(objectID);
-        // Add self to new parent's children and adopt their framebuffer owner
+        
         if (newParent) {
             newParent->children.push_back(this);
             setFBOwner(newParent->renderer->FBOwner);
         } else {
-            // Set framebuffer owner to nullptr if no parent
             setFBOwner(nullptr);
         }
-        // Set parent to new parent
+
         parent = newParent;
     }
 
     UIObject::UIObject() {
-        // Add object to the object list
         objectList.push_back(std::unique_ptr<UIObject>(this));
-        // Generate a unique ID and seed random
         objectID = rand();
-        srand(rand());
-        // Create a renderer
         renderer = std::make_unique<Arriba::Graphics::Renderer>();
         renderer->transform = &transform;
     }
@@ -218,7 +208,7 @@ namespace Arriba {
     std::vector<UIObject*> findObjectsByTag(std::string tag) {
         std::vector<UIObject*> list = {};
         for (size_t i = 0; i < objectList.size(); i++) {
-            if (objectList[i]->tag == tag) list.push_back(objectList[i].get());
+            if (objectList[i]->tag == tag && !pendingDestroySet.count(objectList[i].get())) list.push_back(objectList[i].get());
         }
         return list;
     }

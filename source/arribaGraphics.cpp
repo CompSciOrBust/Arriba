@@ -7,42 +7,40 @@
 #include <iostream>
 #include <fstream>
 
-// True type
 #include <ft2build.h>
-// Libnx
 #include <switch.h>
 
 namespace Arriba::Graphics {
     void initGraphics() {
         graphicsAreInitialised = true;
-        // GLFW init
+
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        // Make window
+
         window = glfwCreateWindow(windowWidth, windowHeight, "Arriba", NULL, NULL);
         if (window == NULL) printf("Failed to create window\n");
         glfwMakeContextCurrent(window);
-        // Init glad
+
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) printf("Glad init failed\n");
-        // Set the view port size and position
+
         glViewport(0, 0, renderWidth, renderHeight);
-        // Create the clip space matrix
+
         clipSpaceMatrix = Arriba::Maths::makeOrtho(0.0f, static_cast<float>(windowWidth), static_cast<float>(windowHeight), 0.0f, 0.0f, 10000.0f);
-        // Enable blending
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        // Generate a blank texture for objects use
+
         unsigned char textureData[] = {255, 255, 255, 255};
         defaultTexture = bufferTexture_RGBA(1, 1, textureData);
-        // Load text shader
+
         textShaderID = loadShader("romfs:/TextVertex.glsl", "romfs:/TextFragment.glsl");
         defaultShaderID = loadShader("romfs:/VertexDefault.glsl", "romfs:/FragmentDefault.glsl");
     }
 
     CharInfo getChar(char32_t c, int size) {
-        // Get the char map, loading it if it does not
+        // Get the char map, loading it if it does not exist
         std::map<char32_t, CharInfo>* charMapT;
         std::map<int, std::map<char32_t, CharInfo>>::iterator mapIt = charMapMap.find(size);
         if (charMapMap.find(size) == charMapMap.end()) {
@@ -57,8 +55,6 @@ namespace Arriba::Graphics {
             return charIt->second;
         }
 
-        // At this point the character does not exist, so create it
-        // Load Nintendo's font
         if (FT_Init_FreeType(&ft)) printf("Failed to init free type\n");
         plInitialize(PlServiceType_User);
         PlFontData standardFontData;
@@ -67,9 +63,8 @@ namespace Arriba::Graphics {
         FT_Set_Pixel_Sizes(face, 0, size);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        // Load the glyph
         if (FT_Load_Glyph(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) printf("Failed to load char\n");
-        // Gen the texture
+
         unsigned int texture = bufferTexture_Red(face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
         CharInfo character = {
             texture,
@@ -77,39 +72,35 @@ namespace Arriba::Graphics {
             Arriba::Maths::vec2<int>{face->glyph->bitmap_left, face->glyph->bitmap_top},
             static_cast<unsigned int>(face->glyph->advance.x)};
 
-        // Add it to the character map
         charMapT->insert(std::make_pair(c, character));
-        // Clean up freetype
+
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
-        // Exit PL
+
         plExit();
         return character;
     }
 
-    // Get ready for some cursed shit
     std::map<char32_t, CharInfo> getFont(int size) {
-        // Check if the font is loaded
         std::map<int, std::map<char32_t, CharInfo>>::iterator mapIt = charMapMap.find(size);
-        // It is so return it
+
         if (mapIt != charMapMap.end()) {
             return mapIt->second;
-        } else { // Font is not loaded, so load it
+        } else {
             std::map<char32_t, CharInfo> charMapT;
-            // Init true type
+
             if (FT_Init_FreeType(&ft)) printf("Failed to init free type\n");
-            // Init pl service
+
             plInitialize(PlServiceType_User);
-            // Load font for debugging
             PlFontData standardFontData;
             plGetSharedFontByType(&standardFontData, PlSharedFontType_Standard);
+
             FT_New_Memory_Face(ft, reinterpret_cast<FT_Byte*>(standardFontData.address), standardFontData.size, 0, &face);
             FT_Set_Pixel_Sizes(face, 0, size);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            for (char32_t c = 0; c < 255; c++) {
-                // Load the glyph
+
+            for (char32_t c = 0; c <= 255; c++) {
                 if (FT_Load_Glyph(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) printf("Failed to load char\n");
-                // Gen the texture
                 unsigned int texture = bufferTexture_Red(face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
                 CharInfo character = {
                     texture,
@@ -118,35 +109,26 @@ namespace Arriba::Graphics {
                     static_cast<unsigned int>(face->glyph->advance.x)};
                 charMapT.insert(std::make_pair(c, character));
             }
-            // Clean up freetype
+
             FT_Done_Face(face);
             FT_Done_FreeType(ft);
-            // Exit PL
+
             plExit();
+
             charMapMap.insert(std::make_pair(size, charMapT));
             return charMapT;
         }
     }
 
     unsigned int loadShader(const char* vertexPath, const char* fragmentPath) {
-        // vars
-        std::ifstream fileStream(vertexPath);
-        std::string vertexCode;
-        std::string fragmentCode;
-        std::string codeLine;
         unsigned int SID;
-        // Read the data
-        while (!fileStream.eof()) {
-            getline(fileStream, codeLine);
-            vertexCode += codeLine + "\n";
-        }
+
+        std::ifstream fileStream(vertexPath);
+        std::string vertexCode((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
         fileStream.close();
         fileStream.open(fragmentPath);
-        while (!fileStream.eof()) {
-            getline(fileStream, codeLine);
-            fragmentCode += codeLine + "\n";
-        }
-        // Compile vertex shader
+        std::string fragmentCode((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+
         unsigned int vertex, fragment;
         int success;
         char debugInfo[512];
@@ -154,63 +136,65 @@ namespace Arriba::Graphics {
         const char* vertexCodeChars = vertexCode.c_str();
         glShaderSource(vertex, 1, &vertexCodeChars, NULL);
         glCompileShader(vertex);
-        // Compile fragment shader
+
         fragment = glCreateShader(GL_FRAGMENT_SHADER);
         const char* fragmentCodeChars = fragmentCode.c_str();
         glShaderSource(fragment, 1, &fragmentCodeChars, NULL);
         glCompileShader(fragment);
-        // Get error info
+
         glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(vertex, 512, NULL, debugInfo);
             printf("%s\n", debugInfo);
         }
+
         glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(fragment, 512, NULL, debugInfo);
             printf("%s\n", debugInfo);
         }
-        // Link the shaders
+
         SID = glCreateProgram();
         glAttachShader(SID, vertex);
         glAttachShader(SID, fragment);
         glLinkProgram(SID);
-        // Get error info
+
         glGetProgramiv(SID, GL_LINK_STATUS, &success);
         if (!success) {
             glGetProgramInfoLog(SID, 512, NULL, debugInfo);
             printf("%s\n", debugInfo);
         }
-        // Clean up
+
         glDeleteShader(vertex);
         glDeleteShader(fragment);
+
         return SID;
     }
 
     unsigned int bufferTexture_RGBA(unsigned int width, unsigned int height, unsigned char* data) {
         unsigned int textureID = 0;
-        // Generate a texture
+        
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
-        // Buffer the data
+
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        // Unbind the texture and return
+
         glBindTexture(GL_TEXTURE_2D, 0);
         return textureID;
     }
 
     unsigned int bufferTexture_Red(unsigned int width, unsigned int height, unsigned char* data) {
         unsigned int textureID = 0;
-        // Generate a texture
+
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
-        // Buffer the data
+
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        // Unbind the texture and return
+
         glBindTexture(GL_TEXTURE_2D, 0);
         return textureID;
     }
@@ -270,7 +254,6 @@ namespace Arriba::Graphics {
     }
 
     void Shader::updateFragments(const char* vertexPath, const char* fragmentPath) {
-        // Delete old shader
         if (!sharedShader) glDeleteProgram(progID);
         progID = loadShader(vertexPath, fragmentPath);
     }
@@ -284,30 +267,30 @@ namespace Arriba::Graphics {
     AdvancedTexture::AdvancedTexture(int _width, int _height) {
         tWidth = _width;
         tHeight = _height;
-        // Gen and bind the new frame buffer
+
         glGenFramebuffers(1, &FBO);
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-        // Generate a new texture to target from the frame buffer
+
         glGenTextures(1, &texID);
         glBindTexture(GL_TEXTURE_2D, texID);
+
         // Note we don't write data to the texture since we're rendering to it from the frame buffer
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tWidth, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // Attach the texture to the frame buffer
+        
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texID, 0);
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) printf("Error: framebuffer incomplete\n");
-        // Unbind the frame buffer
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
+
         // Create clipspace for framebuffer
         clipSpaceMatrix = Arriba::Maths::makeOrtho(0.0f, static_cast<float>(tWidth), 0.0f, static_cast<float>(tHeight), 0.0f, 10000.0f);
     }
 
     AdvancedTexture::~AdvancedTexture() {
-        // Delete the frame buffer
         glDeleteFramebuffers(1, &FBO);
-        // Delete the texture
         glDeleteTextures(1, &texID);
     }
 
@@ -323,17 +306,21 @@ namespace Arriba::Graphics {
     Renderer::Renderer() {
         // Load shader
         // thisShader = Shader();
+
         // Create a vertex array object
         glGenVertexArrays(1, &VAOID);
         glBindVertexArray(VAOID);
+
         // Generate a buffer for the verts
         glGenBuffers(1, &VBOID);
         glBindBuffer(GL_ARRAY_BUFFER, VBOID);
         glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_DYNAMIC_DRAW);
+
         // Create the EBO to store the vert indexes
         glGenBuffers(1, &EBOID);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOID);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_DYNAMIC_DRAW);
+
         // Specify the vertex attributes
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
@@ -342,8 +329,10 @@ namespace Arriba::Graphics {
 
         // Unbind the vertex array
         glBindVertexArray(0);
+
         // Unbind the buffer object
         // glBindBuffer(GL_ARRAY_BUFFER, 0);
+
         // Unbind the EBO
         // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
@@ -369,55 +358,48 @@ namespace Arriba::Graphics {
     }
 
     void Renderer::renderObject() {
-        // Activate shader, set the colour, and bind the VAO
         thisShader.activate();
         thisShader.setFloat4("colour", colour);
         glBindVertexArray(VAOID);
 
-        // Tranform the verts to the correct location
         Arriba::Maths::mat4 transformationMatrix = getTransformMatrix();
         unsigned int transformLoc = glGetUniformLocation(thisShader.progID, "transform");
         // TODO: Make transform matrix upload as an actual float array, this hack may not work on other platforms
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (GLfloat*)&(transformationMatrix));
-        // Get the projection matrix
+
         unsigned int projectionLoc = glGetUniformLocation(thisShader.progID, "projection");
-        // Bind any textures
+
         glBindTexture(GL_TEXTURE_2D, texID);
+
         // If belongs to a framebuffer
         if (FBOwner != nullptr) {
-            // Bind the FB and set the view port size
             glBindFramebuffer(GL_FRAMEBUFFER, FBOwner->FBO);
             glViewport(0, 0, FBOwner->tWidth, FBOwner->tHeight);
-            // Set the transform matrix to the FB's clipspace matrix
             // TODO: Make clip space matrix upload as an actual float array, this hack may not work on other platforms
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat*)&(FBOwner->clipSpaceMatrix));
-            // Draw object and undo changes to OpenGL's state
-            glDrawElements(GL_TRIANGLES, sizeof(indexes), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, sizeof(indexes)/sizeof(indexes[0]), GL_UNSIGNED_INT, 0);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glViewport(0, 0, renderWidth, renderHeight);
-        } else {  // If not beloning to an FBO render as normal
+        } else {
             // TODO: Make clip space matrix upload as an actual float array, this hack may not work on other platforms
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat*)&(clipSpaceMatrix));
-            glDrawElements(GL_TRIANGLES, sizeof(indexes), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, sizeof(indexes)/sizeof(indexes[0]), GL_UNSIGNED_INT, 0);
         }
         glBindVertexArray(0);
     }
 
     void Renderer::loadVerts(float* _verts, unsigned int vertSize, unsigned int* _indexes, unsigned int indexesSize) {
-        // Bind the vao
         glBindVertexArray(VAOID);
-        // Buffer the data in to the VBO
+        
         glBindBuffer(GL_ARRAY_BUFFER, VBOID);
         glBufferData(GL_ARRAY_BUFFER, vertSize, _verts, GL_DYNAMIC_DRAW);
-        // Buffer the indexes in to the EBO
+        
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOID);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexesSize, _indexes, GL_DYNAMIC_DRAW);
     }
 
     void Renderer::updateVerts(float* _verts, unsigned int vertSize) {
-        // Bind the VAO
         glBindVertexArray(VAOID);
-        // Sub buffer the new verts in to the VBO
         glBufferSubData(GL_ARRAY_BUFFER, 0, vertSize, _verts);
     }
 

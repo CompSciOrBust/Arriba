@@ -14,7 +14,6 @@
 namespace Arriba::Graphics {
 struct CharInfo;
 // Vars
-extern bool graphicsAreInitialised;
 inline GLFWwindow* window;
 inline int windowWidth = 1280, windowHeight = 720;
 inline int renderWidth = 1280, renderHeight = 720;

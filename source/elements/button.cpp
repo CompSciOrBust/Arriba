@@ -13,28 +13,35 @@ namespace Arriba::Elements {
     void Button::onFrame() {
         // "Temporary" hack to avoid rewriting buttons to use framebuffers
         text->transform.position = {(right + left)/2, (top + bottom)/2, 0};
-        // When A pressed call all callbacks
+
         if (Arriba::Input::buttonDown(Arriba::Input::controllerButton::AButtonSwitch) && Arriba::highlightedObject == this) {
             for (unsigned int i = 0; i < callbacks.size(); i++) {
                 callbacks[i]();
             }
         }
-        // When tapped call all callbacks and highlight self
+
         bool isTouched = false;
-        if (Arriba::Input::touchScreenPressed() && Arriba::Input::touch.start && activeLayer == layer) {
-            Arriba::Maths::vec3<float> pos = getGlobalPos().col4;
+        if (Arriba::Input::touchScreenPressed() && activeLayer == layer) {
             float touchX = Arriba::Input::touch.pos.x;
             float touchY = Arriba::Input::touch.pos.y;
-            isTouched = touchY < getTop() && touchY > getBottom() && touchX < getRight() && touchX > getLeft();
-            if (isTouched) {
-                Arriba::highlightedObject = this;
+            bool withinBounds = touchY < getTop() && touchY > getBottom() && touchX < getRight() && touchX > getLeft();
+            if (Arriba::Input::touch.start) {
+                if (withinBounds) Arriba::highlightedObject = this;
+                else if (Arriba::highlightedObject == this) Arriba::highlightedObject = nullptr;
+            }
+            if (Arriba::highlightedObject == this) isTouched = withinBounds;
+        }
+
+        if (Arriba::highlightedObject == this && Arriba::Input::touch.end && activeLayer == layer) {
+            float touchX = Arriba::Input::touch.pos.x;
+            float touchY = Arriba::Input::touch.pos.y;
+            if (touchY < getTop() && touchY > getBottom() && touchX < getRight() && touchX > getLeft()) {
                 for (unsigned int i = 0; i < callbacks.size(); i++) {
                     callbacks[i]();
                 }
-            } else if (Arriba::highlightedObject == this) {
-                Arriba::highlightedObject = 0;
             }
         }
+
         // When highlighted cycle between neutral and highlighted colour
         Arriba::Maths::vec4 targetColour = Arriba::Colour::neutral;
         float lerpValue = (sin(Arriba::time*4) + 1) / 2;

@@ -137,7 +137,7 @@ namespace Arriba::Elements {
                     // selectedIndex = int(round(Quad::height / itemHeight)) - int((Quad::getTop() - touchY + root->transform.position.y) / itemHeight);
                 }
             } else if (Arriba::highlightedObject == this) {
-                highlightedObject = 0;
+                highlightedObject = nullptr;
             }
         }
 

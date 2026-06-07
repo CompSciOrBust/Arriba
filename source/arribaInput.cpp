@@ -69,7 +69,7 @@ namespace Arriba::Input {
 
         // Left stick y
         if (abs(AnalogStickLeft.yPos) > 0.4) {
-            if (!AnalogStickLeft.yHeldLastFrame && !AnalogStickLeft.yHeldLastFrame) {
+            if (!AnalogStickLeft.yHeldLastFrame && !AnalogStickLeft.xHeldLastFrame) {
                 if (AnalogStickLeft.yPos > 0.) {
                     _controller->buttons = _controller->buttons | controllerButton::DPadUp;
                 } else {
@@ -97,7 +97,7 @@ namespace Arriba::Input {
 
         // Right stick y
         if (abs(AnalogStickRight.yPos) > 0.4) {
-            if (!AnalogStickRight.yHeldLastFrame && !AnalogStickRight.yHeldLastFrame) {
+            if (!AnalogStickRight.yHeldLastFrame && !AnalogStickRight.xHeldLastFrame) {
                 if (AnalogStickRight.yPos > 0.) {
                     _controller->buttons = _controller->buttons | controllerButton::DPadUp;
                 } else {
