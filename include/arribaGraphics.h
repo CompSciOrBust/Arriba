@@ -28,7 +28,7 @@ inline unsigned int defaultShaderID;
 // Functions
 void initGraphics();
 CharInfo getChar(char32_t c, int size);
-std::map<char32_t, CharInfo> getFont(int size);
+const std::map<char32_t, CharInfo>& getFont(int size);
 unsigned int loadShader(const char* vertexPath, const char* fragmentPath);
 unsigned int bufferTexture_RGBA(unsigned int width, unsigned int height, unsigned char* data);
 unsigned int bufferTexture_Red(unsigned int width, unsigned int height, unsigned char* data);

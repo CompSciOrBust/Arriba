@@ -81,12 +81,11 @@ namespace Arriba::Graphics {
         return character;
     }
 
-    std::map<char32_t, CharInfo> getFont(int size) {
+    const std::map<char32_t, CharInfo>& getFont(int size) {
         std::map<int, std::map<char32_t, CharInfo>>::iterator mapIt = charMapMap.find(size);
 
-        if (mapIt != charMapMap.end()) {
-            return mapIt->second;
-        } else {
+        if (mapIt != charMapMap.end()) return mapIt->second;
+        else {
             std::map<char32_t, CharInfo> charMapT;
 
             if (FT_Init_FreeType(&ft)) printf("Failed to init free type\n");
@@ -115,8 +114,8 @@ namespace Arriba::Graphics {
 
             plExit();
 
-            charMapMap.insert(std::make_pair(size, charMapT));
-            return charMapT;
+            auto [it, inserted] = charMapMap.insert({size, charMapT});
+            return it->second;
         }
     }
 
