@@ -12,7 +12,7 @@
 
 namespace Arriba {
 class UIObject;
-inline std::vector<std::shared_ptr<UIObject>> objectList;
+inline std::vector<UIObject*> objectList;
 inline std::unordered_set<UIObject*> pendingDestroySet;
 inline double deltaTime = 0;
 inline double time = 0;

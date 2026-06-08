@@ -34,6 +34,7 @@ namespace Arriba {
     }
 
     void exit() {
+        for (UIObject* obj : objectList) delete obj;
         objectList.clear();
         
         glDeleteProgram(Arriba::Graphics::defaultShaderID);
@@ -63,15 +64,18 @@ namespace Arriba {
 
         for (size_t i = 0; i < objectList.size(); i++) {
             if (objectList[i]->getParent() != nullptr) continue;
-            if (pendingDestroySet.count(objectList[i].get())) continue;
-            drawFrameActions(objectList[i].get());
+            if (pendingDestroySet.count(objectList[i])) continue;
+            drawFrameActions(objectList[i]);
         }
 
         glfwSwapBuffers(Arriba::Graphics::window);
         glfwPollEvents();
 
         for (int i = objectList.size() - 1; i >= 0; i--) {
-            if (pendingDestroySet.count(objectList[i].get())) objectList.erase(objectList.begin() + i);
+            if (pendingDestroySet.count(objectList[i])) {
+                delete objectList[i];
+                objectList.erase(objectList.begin() + i);
+            }
         }
         pendingDestroySet.clear();
 
@@ -221,14 +225,14 @@ namespace Arriba {
     }
 
     UIObject::UIObject() {
-        objectList.push_back(std::unique_ptr<UIObject>(this));
+        objectList.push_back(this);
         objectID = rand();
         renderer = std::make_unique<Arriba::Graphics::Renderer>();
         renderer->transform = &transform;
     }
 
     UIObject::~UIObject() {
-        // renderer.release();
+        for (Behaviour* b : behaviours) delete b;
     }
 
     UIObject* findObjectByName(const std::string& name) {
