@@ -11,31 +11,12 @@ namespace Arriba::Primitives {
         this->width = width;
         this->height = height;
 
-        if (pivotMode == Arriba::Graphics::centre) {
-            left = -width/2;
-            right = width/2;
-            top = height/2;
-            bottom = -height/2;
-        } else if (pivotMode == Arriba::Graphics::topLeft) {
-            left = 0;
-            right = width;
-            top = height;
-            bottom = 0;
-        } else if (pivotMode == Arriba::Graphics::bottomLeft) {
-            left = 0;
-            right = width;
-            top = 0;
-            bottom = -height;
-        } else if (pivotMode == Arriba::Graphics::topRight) {
-            left = -width;
-            right = 0;
-            top = height;
-            bottom = 0;
-        } else if (pivotMode == Arriba::Graphics::bottomRight) {
-            left = -width;
-            right = 0;
-            top = 0;
-            bottom = -height;
+        switch (pivotMode) {
+            case Arriba::Graphics::centre:      left = -width/2; right = width/2; top = height/2;  bottom = -height/2; break;
+            case Arriba::Graphics::topLeft:     left = 0;        right = width;   top = height;    bottom = 0;         break;
+            case Arriba::Graphics::bottomLeft:  left = 0;        right = width;   top = 0;         bottom = -height;   break;
+            case Arriba::Graphics::topRight:    left = -width;   right = 0;       top = height;    bottom = 0;         break;
+            case Arriba::Graphics::bottomRight: left = -width;   right = 0;       top = 0;         bottom = -height;   break;
         }
 
         // Texture Y coordinates here are a bit hacked to work around inversion issue
