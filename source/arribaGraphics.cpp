@@ -232,29 +232,38 @@ namespace Arriba::Graphics {
         glUseProgram(progID);
     }
 
+    int Shader::getUniformLocation(const char* uniformName) {
+        auto it = uniformCache.find(uniformName);
+        if (it != uniformCache.end()) return it->second;
+        int loc = glGetUniformLocation(progID, uniformName);
+        uniformCache[uniformName] = loc;
+        return loc;
+    }
+
     void Shader::setFloat1(const char* uniformName, float data) {
         activate();
-        glUniform1f(glGetUniformLocation(progID, uniformName), data);
+        glUniform1f(getUniformLocation(uniformName), data);
     }
 
     void Shader::setFloat2(const char* uniformName, Arriba::Maths::vec2<float> data) {
         activate();
-        glUniform2f(glGetUniformLocation(progID, uniformName), data.x, data.y);
+        glUniform2f(getUniformLocation(uniformName), data.x, data.y);
     }
 
     void Shader::setFloat3(const char* uniformName, Arriba::Maths::vec3<float> data) {
         activate();
-        glUniform3f(glGetUniformLocation(progID, uniformName), data.x, data.y, data.z);
+        glUniform3f(getUniformLocation(uniformName), data.x, data.y, data.z);
     }
 
     void Shader::setFloat4(const char* uniformName, Arriba::Maths::vec4<float> data) {
         activate();
-        glUniform4f(glGetUniformLocation(progID, uniformName), data.x, data.y, data.z, data.w);
+        glUniform4f(getUniformLocation(uniformName), data.x, data.y, data.z, data.w);
     }
 
     void Shader::updateFragments(const char* vertexPath, const char* fragmentPath) {
         if (!sharedShader) glDeleteProgram(progID);
         progID = loadShader(vertexPath, fragmentPath);
+        uniformCache.clear();
     }
 
     void Shader::setProgID(unsigned int id) {
@@ -362,11 +371,10 @@ namespace Arriba::Graphics {
         glBindVertexArray(VAOID);
 
         Arriba::Maths::mat4 transformationMatrix = getTransformMatrix();
-        unsigned int transformLoc = glGetUniformLocation(thisShader.progID, "transform");
         // TODO: Make transform matrix upload as an actual float array, this hack may not work on other platforms
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (GLfloat*)&(transformationMatrix));
+        glUniformMatrix4fv(thisShader.getUniformLocation("transform"), 1, GL_FALSE, (GLfloat*)&(transformationMatrix));
 
-        unsigned int projectionLoc = glGetUniformLocation(thisShader.progID, "projection");
+        int projectionLoc = thisShader.getUniformLocation("projection");
 
         glBindTexture(GL_TEXTURE_2D, texID);
 

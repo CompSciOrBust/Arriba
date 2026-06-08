@@ -163,7 +163,6 @@ mat4<T> rotate(mat4<T> originalMatrix, T radians, vec3<T> rotation) {
     return originalMatrix * rotationX * rotationY * rotationZ;
 }
 
-// Does this work? I know this is going to have 1 dimension cut off but I feel like this shouldn't work without editing col4
 template<typename T>
 mat4<T> scale(mat4<T> originalMatrix, vec3<T> scalars) {
     mat4<T> scaleMatrix = mat4<T>();

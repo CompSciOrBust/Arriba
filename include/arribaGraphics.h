@@ -1,6 +1,8 @@
 #pragma once
 
 #include <map>
+#include <unordered_map>
+#include <string>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <arribaMaths.h>
@@ -48,6 +50,7 @@ enum Pivot {
 class Shader {
     private:
         bool sharedShader = false;
+        std::unordered_map<std::string, int> uniformCache;
 
     public:
         Shader(const char* vertexPath = "romfs:/VertexDefault.glsl", const char* fragmentPath = "romfs:/FragmentDefault.glsl");
@@ -55,6 +58,7 @@ class Shader {
         ~Shader();
 
         void activate();
+        int getUniformLocation(const char* uniformName);
         void setFloat1(const char* uniformName, float data);
         void setFloat2(const char* uniformName, Arriba::Maths::vec2<float> data);
         void setFloat3(const char* uniformName, Arriba::Maths::vec3<float> data);
