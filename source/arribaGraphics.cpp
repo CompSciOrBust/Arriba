@@ -22,6 +22,7 @@ namespace Arriba::Graphics {
         window = glfwCreateWindow(windowWidth, windowHeight, "Arriba", NULL, NULL);
         if (window == NULL) printf("Failed to create window\n");
         glfwMakeContextCurrent(window);
+        glfwSwapInterval(1);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) printf("Glad init failed\n");
 
