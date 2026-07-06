@@ -41,8 +41,8 @@ struct Touch {
     Arriba::Maths::vec2<float> delta{0};
     Arriba::Maths::vec2<float> origin{0};
     float downTime = 0;
-    bool start;
-    bool end;
+    bool start = false;
+    bool end = false;
 };
 
 struct ControllerState {
