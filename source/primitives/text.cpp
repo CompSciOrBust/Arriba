@@ -3,14 +3,11 @@
 #include <arribaText.h>
 
 namespace Arriba::Primitives {
-    Text::Text(const char* text, int size) : Arriba::Graphics::AdvancedTexture(1, 1), Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre) {
-        renderer->setTexture(texID);
-        fontSize = size;
-        setText(Arriba::Text::ASCIIToUnicode(text).c_str());
-    }
+    Text::Text(const char* text, int size) : Text(Arriba::Text::ASCIIToUnicode(text).c_str(), size) {}
 
-    Text::Text(const char32_t* text, int size) : Arriba::Graphics::AdvancedTexture(1, 1), Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre) {
-        renderer->setTexture(texID);
+    Text::Text(const char32_t* text, int size) : Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre) {
+        texture = std::make_unique<Arriba::Graphics::AdvancedTexture>(1,1);
+        renderer->setTexture(texture->texID);
         fontSize = size;
         setText(text);
     }
@@ -20,37 +17,29 @@ namespace Arriba::Primitives {
     }
 
     void Text::setText(const char32_t* text) {
-        // Vars for storing geometry info
         int xOffset = 0;
         int maxHeight = 0;
         int minHeight = 0;
-        // Spawn the chars
+        std::vector<Arriba::UIObject*> chars;
         for (unsigned int i = 0; i < std::char_traits<char32_t>::length(text); i++) {
             Arriba::Graphics::CharInfo character = Arriba::Graphics::getChar(text[i], fontSize);
             Quad* child = new Character(character);
             chars.push_back(child);
-            child->setFBOwner(this);
+            child->setFBOwner(texture.get());
             child->setColour({1, 1, 1, 1});
             child->transform.position.x = xOffset + character.bearing.x;
             xOffset += (character.advance >> 6);
             maxHeight = (character.size.y > maxHeight) ? character.size.y : maxHeight;
             minHeight = (character.size.y - character.bearing.y > minHeight) ? character.size.y - character.bearing.y : minHeight;
         }
-        // Center the text to the parent
-        int xDistance = 0;
         int yDistance = maxHeight;
         for (unsigned int i = 0; i < std::char_traits<char32_t>::length(text); i++) {
-            chars.at(i)->transform.position.x -= xDistance;
             chars.at(i)->transform.position.y += yDistance;
         }
-        // Adjust the parent geometry
         setDimensions(xOffset+2, maxHeight + minHeight+2, Arriba::Graphics::Pivot::centre);
-        // Set the colour
         setColour(fontColour);
-        // Resize the framebuffer
-        resize(width, height);
-        // Render framebuffer
-        update();
+        texture->resize(width, height);
+        updateFrameBuffer(chars);
     }
 
     void Text::setColour(const Arriba::Maths::vec4<float>& colour) {
@@ -58,19 +47,12 @@ namespace Arriba::Primitives {
         renderer->setColour(colour);
     }
 
-    void Text::update() {
-        // Render framebuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    void Text::updateFrameBuffer(const std::vector<Arriba::UIObject*>& chars) {
+        glBindFramebuffer(GL_FRAMEBUFFER, texture->FBO);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        for (unsigned int i = 0; i < chars.size(); i++) {
-            drawTextureObject(chars[i]);
-        }
+        for (auto* c : chars) drawTextureObject(c);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // Destroy chars to keep FPS high
-        while (chars.size() != 0) {
-            chars[0]->destroy();
-            chars.erase(chars.begin());
-        }
+        for (auto* c : chars) c->destroy();
     }
 }  // namespace Arriba::Primitives

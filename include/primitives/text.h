@@ -5,12 +5,12 @@
 #include <vector>
 
 namespace Arriba::Primitives {
-    class Text : public Arriba::Graphics::AdvancedTexture, public Quad {
+    class Text : public Quad {
         protected:
             int fontSize;
             Arriba::Maths::vec4<float> fontColour = {0, 0, 0, 1};
-            // Keep track of characters for memory management
-            std::vector<Arriba::UIObject*> chars;
+            std::unique_ptr<Arriba::Graphics::AdvancedTexture> texture = nullptr;
+            void updateFrameBuffer(const std::vector<Arriba::UIObject*>& chars);
 
         public:
             Text(const char* text, int size);
@@ -18,6 +18,5 @@ namespace Arriba::Primitives {
             void setText(const char* text);
             void setText(const char32_t* text);
             void setColour(const Arriba::Maths::vec4<float>& colour) override;
-            void update() override;
     };
 }  // namespace Arriba::Primitives
