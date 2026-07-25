@@ -51,4 +51,4 @@ int InputHOS::getButtonMask() {
     return mask;
 }
 
-} // namespace Arriba::Input
+}  // namespace Arriba::Input

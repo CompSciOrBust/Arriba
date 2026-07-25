@@ -5,10 +5,13 @@
 #include <unordered_set>
 #include <memory>
 #include <string>
+#include <chrono>
 #include <arribaMaths.h>
 #include <arribaGraphics.h>
 #include <arribaInput.h>
+#ifdef __SWITCH__
 #include <switch.h>
+#endif
 
 namespace Arriba {
 class UIObject;
@@ -16,7 +19,7 @@ inline std::vector<UIObject*> objectList;
 inline std::unordered_set<UIObject*> pendingDestroySet;
 inline double deltaTime = 0;
 inline double time = 0;
-inline unsigned long lastFrameTime = 0;
+inline std::chrono::steady_clock::time_point lastFrameTime;
 inline UIObject* highlightedObject = nullptr;
 inline unsigned int activeLayer = 0;
 // variables needed for Horizon OS

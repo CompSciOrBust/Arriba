@@ -8,7 +8,8 @@ enum analogStick {
     leftStick,
     rightStick
 };
-    enum controllerButton {
+
+enum controllerButton {
     // Generic buttons for all platforms
     northButton = 1,
     eastButton = 2,
@@ -52,11 +53,12 @@ struct RawTouch {
 };
 
 class InputBackend {
-    public:
+public:
     virtual ~InputBackend() {};
     virtual void updateControllerState() = 0;
     virtual int getButtonMask() = 0;
     virtual Arriba::Maths::vec2<float> getStickPos(analogStick stick) = 0;
     virtual RawTouch getRawTouch() = 0;
 };
-} // namespace Arriba::Input
+
+}  // namespace Arriba::Input

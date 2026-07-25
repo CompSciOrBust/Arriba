@@ -8,7 +8,6 @@
 #include <arribaMaths.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-// Includes for HOS
 #ifdef __SWITCH__
 #include <switch.h>
 #endif
@@ -21,8 +20,6 @@ inline int windowWidth = 1280, windowHeight = 720;
 inline int renderWidth = 1280, renderHeight = 720;
 inline bool graphicsAreInitialised = false;
 inline Arriba::Maths::mat4<float> clipSpaceMatrix;
-inline FT_Library ft;
-inline FT_Face face;
 inline std::map<int, std::map<char32_t, CharInfo>> charMapMap;
 inline unsigned int defaultTexture;
 inline unsigned int textShaderID;
@@ -48,28 +45,28 @@ enum Pivot {
 };
 
 class Shader {
-    private:
-        bool sharedShader = false;
-        std::unordered_map<std::string, int> uniformCache;
+private:
+    bool sharedShader = false;
+    std::unordered_map<std::string, int> uniformCache;
 
-    public:
-        Shader(const char* vertexPath = "romfs:/VertexDefault.glsl", const char* fragmentPath = "romfs:/FragmentDefault.glsl");
-        Shader(unsigned int id);
-        ~Shader();
+public:
+    Shader(const char* vertexPath = nullptr, const char* fragmentPath = nullptr);
+    Shader(unsigned int id);
+    ~Shader();
 
-        void activate();
-        int getUniformLocation(const char* uniformName);
-        void setFloat1(const char* uniformName, float data);
-        void setFloat2(const char* uniformName, Arriba::Maths::vec2<float> data);
-        void setFloat3(const char* uniformName, Arriba::Maths::vec3<float> data);
-        void setFloat4(const char* uniformName, Arriba::Maths::vec4<float> data);
-        void updateFragments(const char* vertexPath, const char* fragmentPath);
-        void setProgID(unsigned int id);
-        unsigned int progID;
+    void activate();
+    int getUniformLocation(const char* uniformName);
+    void setFloat1(const char* uniformName, float data);
+    void setFloat2(const char* uniformName, Arriba::Maths::vec2<float> data);
+    void setFloat3(const char* uniformName, Arriba::Maths::vec3<float> data);
+    void setFloat4(const char* uniformName, Arriba::Maths::vec4<float> data);
+    void updateFragments(const char* vertexPath, const char* fragmentPath);
+    void setProgID(unsigned int id);
+    unsigned int progID;
 };
 
 class AdvancedTexture {
-    public:
+public:
     AdvancedTexture(int width, int height);
     ~AdvancedTexture();
 
@@ -84,41 +81,41 @@ class AdvancedTexture {
 };
 
 class Renderer {
-    protected:
-        float verts[20] = {
-             0.5f,  0.5f, 0.0f, 1.0f, 1.0f,  // top right
-             0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // bottom right
-            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,  // bottom left
-            -0.5f,  0.5f, 0.0f, 0.0f, 1.0f   // top left
-        };
-        unsigned int indexes[6] = {
-            0, 1, 3,  // First triangle
-            1, 2, 3  // Second triangle
-        };
-        Arriba::Maths::vec4<float> colour = {1, 1, 1, 1};
+protected:
+    float verts[20] = {
+         0.5f,  0.5f, 0.0f, 1.0f, 1.0f,  // top right
+         0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,  // bottom left
+        -0.5f,  0.5f, 0.0f, 0.0f, 1.0f   // top left
+    };
+    unsigned int indexes[6] = {
+        0, 1, 3,  // First triangle
+        1, 2, 3  // Second triangle
+    };
+    Arriba::Maths::vec4<float> colour = {1, 1, 1, 1};
 
-        unsigned int VBOID;
-        unsigned int VAOID;
-        unsigned int EBOID;
-        unsigned int texID = defaultTexture;
-        Arriba::Maths::mat4<float> parentTransform;
+    unsigned int VBOID;
+    unsigned int VAOID;
+    unsigned int EBOID;
+    unsigned int texID = defaultTexture;
+    Arriba::Maths::mat4<float> parentTransform;
 
-    public:
-        Renderer();
-        ~Renderer();
-        Shader thisShader = Shader(defaultShaderID);
+public:
+    Renderer();
+    ~Renderer();
+    Shader thisShader = Shader(defaultShaderID);
 
-        Arriba::Maths::mat4<float> getTransformMatrix();
-        void updateParentTransform(const Arriba::Maths::mat4<float>& pt);
-        void renderObject();
-        void loadVerts(float* verts, unsigned int vertSize, unsigned int* indexes, unsigned int indexesSize);
-        void updateVerts(float* verts, unsigned int vertSize);
-        void setTexture(unsigned int ID);
-        void setColour(const Arriba::Maths::vec4<float>& colour);
-        Arriba::Maths::vec4<float> getColour();
+    Arriba::Maths::mat4<float> getTransformMatrix();
+    void updateParentTransform(const Arriba::Maths::mat4<float>& pt);
+    void renderObject();
+    void loadVerts(float* verts, unsigned int vertSize, unsigned int* indexes, unsigned int indexesSize);
+    void updateVerts(float* verts, unsigned int vertSize);
+    void setTexture(unsigned int ID);
+    void setColour(const Arriba::Maths::vec4<float>& colour);
+    Arriba::Maths::vec4<float> getColour();
 
-        Arriba::Maths::Transform* transform = nullptr;
-        Arriba::Graphics::AdvancedTexture* FBOwner = nullptr;
+    Arriba::Maths::Transform* transform = nullptr;
+    Arriba::Graphics::AdvancedTexture* FBOwner = nullptr;
 };
 
 struct CharInfo {

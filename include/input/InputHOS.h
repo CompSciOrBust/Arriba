@@ -5,15 +5,15 @@
 
 namespace Arriba::Input {
 class InputHOS : public InputBackend {
-    private:
+private:
     PadState pad;
     int npadKHeld = 0;
 
-    public:
+public:
     InputHOS();
     virtual void updateControllerState();
     virtual int getButtonMask();
     virtual Arriba::Maths::vec2<float> getStickPos(analogStick stick);
     virtual RawTouch getRawTouch();
 };
-} // namespace Arriba::Input
+}  // namespace Arriba::Input
