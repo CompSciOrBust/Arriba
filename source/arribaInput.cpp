@@ -1,150 +1,88 @@
 #include <arribaInput.h>
+#ifdef __SWITCH__
+#include <input/InputHOS.h>
+#endif
 
 namespace Arriba::Input {
-    void initInput() {
-        // HOS init code
-        #ifdef __SWITCH__
-        padConfigureInput(1, HidNpadStyleSet_NpadStandard);
-        padInitializeDefault(&pad);
-        hidInitializeTouchScreen();
-        #endif
+struct ControllerState { int buttons = 0; };
+static std::unique_ptr<InputBackend> inputBackend;
+static unsigned int kHeld;
+static unsigned int kDown;
+static unsigned int kUp;
+static RawTouch rawTouch;
+static bool touchLastFrame = false;
+static ControllerState controller;
+
+void initInput() {
+    #ifdef __SWITCH__
+    inputBackend = std::make_unique<InputHOS>();
+    #endif
+}
+
+static void applyAxisDPad(int& buttons, float axisPos, bool& axisHeld, bool otherAxisHeld, controllerButton positive, controllerButton negative) {
+    if (abs(axisPos) > 0.4f) {
+        if (!axisHeld && !otherAxisHeld) buttons |= (axisPos > 0.f) ? positive : negative;
+        axisHeld = true;
+    } else {
+        axisHeld = false;
     }
+}
 
-    void controllerUpdate(ControllerState* controller) {
-        // Get pad input for HOS
-        #ifdef __SWITCH__
-        int buttonsDownLastFrame = controller->buttons;
-        controller->buttons = 0;
-        padUpdate(&pad);
-        int npadKHeld = padGetButtons(&pad);
-        // Set button pressed bits
-        // First AND the npad button bit with the pressed bits
-        // Then AND that with 1 to give 1 when the button is pressed and 0 otherwise
-        // Use some bit hacking to turn the 1 in to 0xFFFF....
-        // Xor that with the Arriba button bit
-        // Finally OR it with the pressed bits and update the pressed bits in the struct
+static void controllerUpdate(ControllerState& controller) {
+    int buttonsDownLastFrame = controller.buttons;
+    inputBackend->updateControllerState();
+    controller.buttons = inputBackend->getButtonMask();
 
-        // ABXY
-        controller->buttons = controller->buttons | (controllerButton::XButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_X)));
-        controller->buttons = controller->buttons | (controllerButton::AButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_A)));
-        controller->buttons = controller->buttons | (controllerButton::BButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_B)));
-        controller->buttons = controller->buttons | (controllerButton::YButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_Y)));
+    auto leftPos = inputBackend->getStickPos(leftStick);
+    AnalogStickLeft.xPos = leftPos.x;
+    AnalogStickLeft.yPos = leftPos.y;
+    auto rightPos = inputBackend->getStickPos(rightStick);
+    AnalogStickRight.xPos = rightPos.x;
+    AnalogStickRight.yPos = rightPos.y;
 
-        // DPAD
-        controller->buttons = controller->buttons | (controllerButton::DPadUp & -(unsigned int)(1 && (npadKHeld & HidNpadButton_Up)));
-        controller->buttons = controller->buttons | (controllerButton::DPadRight & -(unsigned int)(1 && (npadKHeld & HidNpadButton_Right)));
-        controller->buttons = controller->buttons | (controllerButton::DPadDown & -(unsigned int)(1 && (npadKHeld & HidNpadButton_Down)));
-        controller->buttons = controller->buttons | (controllerButton::DPadLeft & -(unsigned int)(1 && (npadKHeld & HidNpadButton_Left)));
+    applyAxisDPad(controller.buttons, AnalogStickLeft.xPos,  AnalogStickLeft.xHeldLastFrame,  AnalogStickLeft.yHeldLastFrame,  DPadRight, DPadLeft);
+    applyAxisDPad(controller.buttons, AnalogStickLeft.yPos,  AnalogStickLeft.yHeldLastFrame,  AnalogStickLeft.xHeldLastFrame,  DPadUp,    DPadDown);
+    applyAxisDPad(controller.buttons, AnalogStickRight.xPos, AnalogStickRight.xHeldLastFrame, AnalogStickRight.yHeldLastFrame, DPadRight, DPadLeft);
+    applyAxisDPad(controller.buttons, AnalogStickRight.yPos, AnalogStickRight.yHeldLastFrame, AnalogStickRight.xHeldLastFrame, DPadUp,    DPadDown);
 
-        // PLUS / MINUS
-        controller->buttons = controller->buttons | (controllerButton::PlusButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_Plus)));
-        controller->buttons = controller->buttons | (controllerButton::MinusButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_Minus)));
+    kHeld = buttonsDownLastFrame & controller.buttons;
+    kUp = buttonsDownLastFrame & ~controller.buttons;
+    kDown = controller.buttons & ~buttonsDownLastFrame;
+}
 
-        // Triggers / Shoulder buttons
-        controller->buttons = controller->buttons | (controllerButton::LButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_L)));
-        controller->buttons = controller->buttons | (controllerButton::RButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_R)));
-        controller->buttons = controller->buttons | (controllerButton::ZLButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_ZL)));
-        controller->buttons = controller->buttons | (controllerButton::ZRButtonSwitch & -(unsigned int)(1 && (npadKHeld & HidNpadButton_ZR)));
-
-        // Update analog stick values
-        AnalogStickLeft.xPos = padGetStickPos(&pad, 0).x / static_cast<float>(JOYSTICK_MAX);
-        AnalogStickLeft.yPos = padGetStickPos(&pad, 0).y / static_cast<float>(JOYSTICK_MAX);
-        AnalogStickRight.xPos = padGetStickPos(&pad, 1).x / static_cast<float>(JOYSTICK_MAX);
-        AnalogStickRight.yPos = padGetStickPos(&pad, 1).y / static_cast<float>(JOYSTICK_MAX);
-
-        // Treat taps as DPAD input
-        // Left stick x
-        if (abs(AnalogStickLeft.xPos) > 0.4) {
-            if (!AnalogStickLeft.xHeldLastFrame && !AnalogStickLeft.yHeldLastFrame) {
-                if (AnalogStickLeft.xPos > 0.) {
-                    controller->buttons = controller->buttons | controllerButton::DPadRight;
-                } else {
-                    controller->buttons = controller->buttons | controllerButton::DPadLeft;
-                }
-            }
-            AnalogStickLeft.xHeldLastFrame = true;
-        } else {
-            AnalogStickLeft.xHeldLastFrame = false;
-        }
-
-        // Left stick y
-        if (abs(AnalogStickLeft.yPos) > 0.4) {
-            if (!AnalogStickLeft.yHeldLastFrame && !AnalogStickLeft.xHeldLastFrame) {
-                if (AnalogStickLeft.yPos > 0.) {
-                    controller->buttons = controller->buttons | controllerButton::DPadUp;
-                } else {
-                    controller->buttons = controller->buttons | controllerButton::DPadDown;
-                }
-            }
-            AnalogStickLeft.yHeldLastFrame = true;
-        } else {
-            AnalogStickLeft.yHeldLastFrame = false;
-        }
-
-        // Right stick x
-        if (abs(AnalogStickRight.xPos) > 0.4) {
-            if (!AnalogStickRight.xHeldLastFrame && !AnalogStickRight.yHeldLastFrame) {
-                if (AnalogStickRight.xPos > 0.) {
-                    controller->buttons = controller->buttons | controllerButton::DPadRight;
-                } else {
-                    controller->buttons = controller->buttons | controllerButton::DPadLeft;
-                }
-            }
-            AnalogStickRight.xHeldLastFrame = true;
-        } else {
-            AnalogStickRight.xHeldLastFrame = false;
-        }
-
-        // Right stick y
-        if (abs(AnalogStickRight.yPos) > 0.4) {
-            if (!AnalogStickRight.yHeldLastFrame && !AnalogStickRight.xHeldLastFrame) {
-                if (AnalogStickRight.yPos > 0.) {
-                    controller->buttons = controller->buttons | controllerButton::DPadUp;
-                } else {
-                    controller->buttons = controller->buttons | controllerButton::DPadDown;
-                }
-            }
-            AnalogStickRight.yHeldLastFrame = true;
-        } else {
-            AnalogStickRight.yHeldLastFrame = false;
-        }
-
-        kHeld = buttonsDownLastFrame & controller->buttons;
-        kUp = buttonsDownLastFrame & ~controller->buttons;
-        kDown = controller->buttons & ~buttonsDownLastFrame;
-        #endif
+static void updateTouchState() {
+    rawTouch = inputBackend->getRawTouch();
+    if (rawTouch.pressed) {
+        if (touchLastFrame) touch.delta = {touch.pos.x - rawTouch.x, touch.pos.y - rawTouch.y};
+        touch.pos = {rawTouch.x, rawTouch.y};
+        if (!touchLastFrame) touch.origin = touch.pos;
+        touch.downTime += Arriba::deltaTime;
+        touch.start = !touchLastFrame;
+    } else if (!touchLastFrame) {
+        touch.downTime = 0;
     }
+    touch.end = !rawTouch.pressed && touchLastFrame;
+    touchLastFrame = rawTouch.pressed;
+}
 
-    void updateHID() {
-        controllerUpdate(&controller);
+void updateHID() {
+    controllerUpdate(controller);
+    updateTouchState();
+}
 
-        hidGetTouchScreenStates(&touchState, 1);
-        if (touchScreenPressed()) {
-            if (touchLastFrame) touch.delta = {touch.pos.x - touchState.touches[0].x, touch.pos.y - touchState.touches[0].y};
-            touch.pos = {touchState.touches[0].x, touchState.touches[0].y};
-            if (!touchLastFrame) touch.origin = touch.pos;
-            touch.downTime += Arriba::deltaTime;
-            touch.start = !touchLastFrame;
-        } else if (!touchLastFrame) {
-            touch.downTime = 0;
-        }
-        touch.end = !touchScreenPressed() && touchLastFrame;
-        touchLastFrame = touchScreenPressed();
-    }
+bool buttonHeld(controllerButton button) {
+    return (kHeld & button);
+}
 
-    bool buttonHeld(controllerButton button) {
-        return (kHeld & button);
-    }
+bool buttonDown(controllerButton button) {
+    return (kDown & button);
+}
 
-    bool buttonDown(controllerButton button) {
-        return (kDown & button);
-    }
+bool buttonUp(controllerButton button) {
+    return (kUp & button);
+}
 
-    bool buttonUp(controllerButton button) {
-        return (kUp & button);
-    }
-
-    bool touchScreenPressed() {
-        return touchState.count;
-    }
+bool touchScreenPressed() {
+    return rawTouch.pressed;
+}
 }  // namespace Arriba::Input
