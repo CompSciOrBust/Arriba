@@ -99,11 +99,11 @@ namespace Arriba::Elements {
             }
         }
 
-        if (Arriba::Input::buttonDown(Arriba::Input::controllerButton::AButtonSwitch) && selectedIndex != -1) {
+        if (Arriba::Input::buttonDown(Arriba::Input::confirmButton) && selectedIndex != -1) {
             for (auto& cb : callbacks) cb(selectedIndex);
         }
 
-        if (Arriba::Input::buttonDown(Arriba::Input::controllerButton::YButtonSwitch) && selectedIndex != -1) {
+        if (Arriba::Input::buttonDown(Arriba::Input::controllerButton::westButton) && selectedIndex != -1) {
             spawnTextForItem(selectedIndex);
             auto* selectedItemText = static_cast<Arriba::Primitives::Quad*>(root->getChildren()[selectedIndex]->getChildren()[0]);
             float menuX = transform.position.x + (float)selectedItemText->getRight();
@@ -165,7 +165,7 @@ namespace Arriba::Elements {
 
             if (Arriba::highlightedObject != this) {
                 item->setColour(Arriba::Maths::lerp(item->getColour(), Arriba::Colour::highlightB, fadeTime));
-            } else if (selectedIndex != lastSelectedIndex || Arriba::Input::buttonDown(Arriba::Input::controllerButton::AButtonSwitch)) {
+            } else if (selectedIndex != lastSelectedIndex || Arriba::Input::buttonDown(Arriba::Input::confirmButton)) {
                 item->setColour(Arriba::Colour::activatedColour);
             } else {
                 float lerpValue = (sin(Arriba::time*4) + 1) / 2;
@@ -179,10 +179,10 @@ namespace Arriba::Elements {
         glBindFramebuffer(GL_FRAMEBUFFER, texture->FBO);
         drawTextureObject(bg);
 
-        unsigned int listItemRenderIndex = -root->transform.position.y / itemHeight;
-        unsigned int listItemRenderCount = listItemRenderIndex + height / itemHeight + 1;
-        if (listItemRenderCount > itemCount) listItemRenderCount = itemCount;
-        for (unsigned int i = listItemRenderIndex; i < listItemRenderCount; i++) {
+        unsigned int listItemRenderIndex = std::floor(-root->transform.position.y / static_cast<float>(itemHeight));
+        unsigned int listItemRenderEnd = std::ceil(listItemRenderIndex + height / static_cast<float>(itemHeight)) + 1;
+        if (listItemRenderEnd > itemCount) listItemRenderEnd = itemCount;
+        for (unsigned int i = listItemRenderIndex; i < listItemRenderEnd; i++) {
             spawnTextForItem(i);
             Arriba::UIObject* container = root->getChildren()[i];
             container->renderer->updateParentTransform(root->renderer->getTransformMatrix());

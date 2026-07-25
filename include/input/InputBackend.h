@@ -10,6 +10,8 @@ enum analogStick {
 };
 
 enum controllerButton {
+    invalid = 0,
+    
     // Generic buttons for all platforms
     northButton = 1,
     eastButton = 2,
@@ -27,17 +29,30 @@ enum controllerButton {
     triggerRight = 16384,
 
     // Switch specific button names
-    XButtonSwitch = 1,
-    AButtonSwitch = 2,
-    BButtonSwitch = 4,
-    YButtonSwitch = 8,
-    PlusButtonSwitch = 512,
-    MinusButtonSwitch = 1024,
-    LButtonSwitch = 2048,
-    RButtonSwitch = 4096,
-    ZLButtonSwitch = 8192,
-    ZRButtonSwitch = 16384
+    XButtonSwitch = northButton,
+    AButtonSwitch = eastButton,
+    BButtonSwitch = southButton,
+    YButtonSwitch = westButton,
+    PlusButtonSwitch = optionsRight,
+    MinusButtonSwitch = optionsLeft,
+    LButtonSwitch = shoulderLeft,
+    RButtonSwitch = shoulderRight,
+    ZLButtonSwitch = triggerLeft,
+    ZRButtonSwitch = triggerRight,
+
+    // Steam / XBOX button names
+    YButtonSteam = northButton,
+    BButtonSteam = eastButton,
+    AButtonSteam = southButton,
+    XButtonSteam = westButton,
+    L1ButtonSteam = shoulderLeft,
+    R1ButtonSteam = shoulderRight,
+    L2ButtonSteam = triggerLeft,
+    R2ButtonSteam = triggerRight,
 };
+
+inline controllerButton confirmButton = invalid;
+inline controllerButton backButton = invalid;
 
 struct AnalogStick {
     float xPos = 0;

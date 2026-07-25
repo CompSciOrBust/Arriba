@@ -14,7 +14,7 @@ namespace Arriba::Elements {
         // "Temporary" hack to avoid rewriting buttons to use framebuffers
         text->transform.position = {(right + left)/2, (top + bottom)/2, 0};
 
-        if (Arriba::Input::buttonDown(Arriba::Input::controllerButton::AButtonSwitch) && Arriba::highlightedObject == this) {
+        if (Arriba::Input::buttonDown(Arriba::Input::confirmButton) && Arriba::highlightedObject == this) {
             for (auto& cb : callbacks) cb();
         }
 
@@ -40,7 +40,7 @@ namespace Arriba::Elements {
         float lerpValue = (sin(Arriba::time*4) + 1) / 2;
         if (Arriba::highlightedObject == this) {
             targetColour = Arriba::Maths::lerp(Arriba::Colour::highlightA, Arriba::Colour::highlightB, lerpValue);
-            if (Arriba::Input::buttonDown(Arriba::Input::controllerButton::AButtonSwitch) || isTouched) setColour(Arriba::Colour::activatedColour);
+            if (Arriba::Input::buttonDown(Arriba::Input::confirmButton) || isTouched) setColour(Arriba::Colour::activatedColour);
         }
         float fadeTime = 3 * Arriba::deltaTime;
         setColour(Arriba::Maths::lerp(getColour(), targetColour, fadeTime));

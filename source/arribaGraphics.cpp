@@ -21,6 +21,15 @@ void initGraphics() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    // Temporary workaround for initial Steam Deck support
+    // Need to get this from the OS and support window resizing
+    #ifdef __linux__
+    windowWidth = 1280;
+    windowHeight = 800;
+    renderWidth = 1280;
+    renderHeight = 800;
+    #endif
+
     window = glfwCreateWindow(windowWidth, windowHeight, "Arriba", NULL, NULL);
     if (window == NULL) printf("Failed to create window\n");
     glfwMakeContextCurrent(window);

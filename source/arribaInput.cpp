@@ -1,6 +1,8 @@
 #include <arribaInput.h>
 #ifdef __SWITCH__
 #include <input/InputHOS.h>
+#elif defined(__linux__)
+#include <input/InputSDL.h>
 #endif
 
 namespace Arriba::Input {
@@ -16,6 +18,8 @@ static ControllerState controller;
 void initInput() {
     #ifdef __SWITCH__
     inputBackend = std::make_unique<InputHOS>();
+    #elif defined(__linux__)
+    inputBackend = std::make_unique<InputSDL>();
     #endif
 }
 

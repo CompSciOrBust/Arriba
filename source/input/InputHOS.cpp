@@ -1,3 +1,4 @@
+#ifdef __SWITCH__
 #include <InputHOS.h>
 
 namespace Arriba::Input {
@@ -6,6 +7,8 @@ InputHOS::InputHOS()
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     padInitializeDefault(&pad);
     hidInitializeTouchScreen();
+    confirmButton = controllerButton::AButtonSwitch;
+    backButton = controllerButton::BButtonSwitch;
 }
 
 RawTouch InputHOS::getRawTouch() {
@@ -52,3 +55,4 @@ int InputHOS::getButtonMask() {
 }
 
 }  // namespace Arriba::Input
+#endif  // __SWITCH__
