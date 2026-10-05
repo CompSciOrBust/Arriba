@@ -56,6 +56,7 @@ public:
 
     void activate();
     int getUniformLocation(const char* uniformName);
+    void setBool(const char* uniformName, bool data);
     void setFloat1(const char* uniformName, float data);
     void setFloat2(const char* uniformName, Arriba::Maths::vec2<float> data);
     void setFloat3(const char* uniformName, Arriba::Maths::vec3<float> data);

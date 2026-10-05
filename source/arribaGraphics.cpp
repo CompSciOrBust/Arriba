@@ -265,6 +265,11 @@ int Shader::getUniformLocation(const char* uniformName) {
     return loc;
 }
 
+void Shader::setBool(const char* uniformName, bool data) {
+    activate();
+    glUniform1i(getUniformLocation(uniformName), static_cast<int>(data));
+}
+
 void Shader::setFloat1(const char* uniformName, float data) {
     activate();
     glUniform1f(getUniformLocation(uniformName), data);
@@ -289,6 +294,7 @@ void Shader::updateFragments(const char* vertexPath, const char* fragmentPath) {
     if (!sharedShader) glDeleteProgram(progID);
     progID = loadShader(vertexPath, fragmentPath);
     uniformCache.clear();
+    sharedShader = false;
 }
 
 void Shader::setProgID(unsigned int id) {
