@@ -70,7 +70,32 @@ CharInfo getChar(char32_t c, int size) {
     FT_Set_Pixel_Sizes(face, 0, size);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    if (FT_Load_Glyph(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) printf("Failed to load char\n");
+    FT_UInt glyphIndex = FT_Get_Char_Index(face, c);
+
+    #ifdef __SWITCH__
+    if (glyphIndex == 0) {
+        static const PlSharedFontType fallbacks[] = {
+            PlSharedFontType_ChineseTraditional,
+            PlSharedFontType_ChineseSimplified,
+        };
+        for (PlSharedFontType type : fallbacks) {
+            FT_Face fallback;
+            if (Arriba::Font::loadFontFallback(ft, fallback, type)) {
+                FT_UInt idx = FT_Get_Char_Index(fallback, c);
+                if (idx != 0) {
+                    FT_Done_Face(face);
+                    face = fallback;
+                    glyphIndex = idx;
+                    FT_Set_Pixel_Sizes(face, 0, size);
+                    break;
+                }
+                FT_Done_Face(fallback);
+            }
+        }
+    }
+    #endif
+
+    if (FT_Load_Glyph(face, glyphIndex, FT_LOAD_RENDER)) printf("Failed to load char\n");
 
     unsigned int texture = bufferTexture_Red(face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
     CharInfo character = {

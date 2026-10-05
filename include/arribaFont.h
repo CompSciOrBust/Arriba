@@ -23,6 +23,14 @@ inline void loadFont(FT_Library ft, FT_Face& face) {
     #endif
 }
 
+#ifdef __SWITCH__
+inline bool loadFontFallback(FT_Library ft, FT_Face& face, PlSharedFontType type) {
+    PlFontData fontData;
+    if (R_FAILED(plGetSharedFontByType(&fontData, type))) return false;
+    return FT_New_Memory_Face(ft, reinterpret_cast<FT_Byte*>(fontData.address), fontData.size, 0, &face) == 0;
+}
+#endif
+
 inline void unloadFont(FT_Library ft, FT_Face& face) {
     FT_Done_Face(face);
     FT_Done_FreeType(ft);

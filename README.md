@@ -1,2 +1,2 @@
 # Arriba
-UI Framework for the Nintendo Switch
+UI Framework for Nintendo Switch and Steam Deck
