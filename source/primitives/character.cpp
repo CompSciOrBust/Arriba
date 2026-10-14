@@ -20,8 +20,7 @@ namespace Arriba::Primitives {
         };
 
         renderer->updateVerts(verts, sizeof(verts));
-        // renderer->thisShader.updateFragments("romfs:/TextVertex.glsl", "romfs:/TextFragment.glsl");
-        renderer->thisShader.setProgID(Arriba::Graphics::textShaderID);
+        renderer->thisShader.setProgID(Arriba::Graphics::getSharedShader("text"));
         renderer->setTexture(character.texID);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));

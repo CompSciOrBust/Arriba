@@ -2,12 +2,14 @@
 
 #include <functional>
 #include <arribaPrimitives.h>
+#include <elements/wrapText.h>
 
 namespace Arriba::Elements {
     class Button : public Arriba::Primitives::Quad {
         private:
-            Arriba::Primitives::Text* text;
+            Arriba::Elements::WrapText * text;
             std::vector<std::function<void()>> callbacks;
+            int prevWidth = 0;
 
         public:
             Button();

@@ -39,8 +39,7 @@ void exit() {
     for (UIObject* obj : objectList) delete obj;
     objectList.clear();
 
-    glDeleteProgram(Arriba::Graphics::defaultShaderID);
-    glDeleteProgram(Arriba::Graphics::textShaderID);
+    Arriba::Graphics::cleanupSharedShaders();
 
     glfwTerminate();
 

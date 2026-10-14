@@ -8,8 +8,11 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <map>
 
 #include <ft2build.h>
+
+static std::map<std::string, unsigned int> sharedShaderMap;
 
 namespace Arriba::Graphics {
 
@@ -47,8 +50,8 @@ void initGraphics() {
     unsigned char textureData[] = {255, 255, 255, 255};
     defaultTexture = bufferTexture_RGBA(1, 1, textureData);
 
-    textShaderID = loadShader(Arriba::FS::resolveAssetPath("TextVertex.glsl").c_str(), Arriba::FS::resolveAssetPath("TextFragment.glsl").c_str());
-    defaultShaderID = loadShader(Arriba::FS::resolveAssetPath("VertexDefault.glsl").c_str(), Arriba::FS::resolveAssetPath("FragmentDefault.glsl").c_str());
+    createSharedShader("text", Arriba::FS::resolveAssetPath("TextVertex.glsl").c_str(), Arriba::FS::resolveAssetPath("TextFragment.glsl").c_str());
+    createSharedShader("default", Arriba::FS::resolveAssetPath("VertexDefault.glsl").c_str(), Arriba::FS::resolveAssetPath("FragmentDefault.glsl").c_str());
 }
 
 CharInfo getChar(char32_t c, int size) {
@@ -237,6 +240,24 @@ void dockStatusCallback(AppletHookType type, void* parameters) {
     glViewport(0, 0, renderWidth, renderHeight);
 }
 #endif
+
+unsigned int getSharedShader(const char* name) {
+    auto it = sharedShaderMap.find(name);
+    return it->second;
+}
+
+unsigned int createSharedShader(const char* name, const char* vertexPath, const char* fragmentPath) {
+    auto it = sharedShaderMap.find(name);
+    if (it != sharedShaderMap.end()) return it->second;
+    unsigned int id = loadShader(vertexPath, fragmentPath);
+    sharedShaderMap[name] = id;
+    return id;
+}
+
+void cleanupSharedShaders() {
+    for (auto& [name, id] : sharedShaderMap) glDeleteProgram(id);
+    sharedShaderMap.clear();
+}
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     std::string vPath = vertexPath ? vertexPath : Arriba::FS::resolveAssetPath("VertexDefault.glsl");

@@ -1,16 +1,22 @@
 #include <elements/button.h>
 #include <arribaText.h>
+#include <elements/wrapText.h>
 
 namespace Arriba::Elements {
     Button::Button() : Arriba::Primitives::Quad(0, 0, 0, 0, Arriba::Graphics::Pivot::centre) {
-        text = new Arriba::Primitives::Text(U"Default", 48);
-        text->setParent(this);
         setDimensions(200, 200, Arriba::Graphics::Pivot::centre);
-        text->transform.position = {(right + left)/2, (top + bottom)/2, 0};
         setColour(Arriba::Colour::neutral);
+        text = new Arriba::Elements::WrapText(U"Default", 48, this->width);
+        text->setParent(this);
+        text->transform.position = {(right + left)/2, (top + bottom)/2, 0};
     }
 
     void Button::onFrame() {
+        if (prevWidth != width) {
+            prevWidth = width;
+            text->setWrapWidth(width);
+        }
+        
         // "Temporary" hack to avoid rewriting buttons to use framebuffers
         text->transform.position = {(right + left)/2, (top + bottom)/2, 0};
 
@@ -52,6 +58,7 @@ namespace Arriba::Elements {
 
     void Button::setText(const char32_t* text) {
         this->text->setText(text);
+        this->text->setWrapWidth(this->width);
     }
 
     void Button::registerCallback(std::function<void()> func) {

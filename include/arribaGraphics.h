@@ -22,13 +22,14 @@ inline bool graphicsAreInitialised = false;
 inline Arriba::Maths::mat4<float> clipSpaceMatrix;
 inline std::map<int, std::map<char32_t, CharInfo>> charMapMap;
 inline unsigned int defaultTexture;
-inline unsigned int textShaderID;
-inline unsigned int defaultShaderID;
 // Functions
 void initGraphics();
 CharInfo getChar(char32_t c, int size);
 const std::map<char32_t, CharInfo>& getFont(int size);
 unsigned int loadShader(const char* vertexPath, const char* fragmentPath);
+unsigned int getSharedShader(const char* name);
+unsigned int createSharedShader(const char* name, const char* vertexPath, const char* fragmentPath);
+void cleanupSharedShaders();
 unsigned int bufferTexture_RGBA(unsigned int width, unsigned int height, unsigned char* data);
 unsigned int bufferTexture_Red(unsigned int width, unsigned int height, unsigned char* data);
 // HOS functions
@@ -104,7 +105,7 @@ protected:
 public:
     Renderer();
     ~Renderer();
-    Shader thisShader = Shader(defaultShaderID);
+    Shader thisShader = Shader(Arriba::Graphics::getSharedShader("default"));
 
     Arriba::Maths::mat4<float> getTransformMatrix();
     void updateParentTransform(const Arriba::Maths::mat4<float>& pt);
