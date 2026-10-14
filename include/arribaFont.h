@@ -1,9 +1,12 @@
 #pragma once
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
+#include <memory>
+#include <font/FontBackend.h>
 #ifdef __SWITCH__
-#include <switch.h>
+#include <font/FontBackendHOS.h>
+#else
+#include <font/FontBackendDesktop.h>
+#include <string>
 #endif
 
 namespace Arriba::Font {
@@ -12,30 +15,13 @@ namespace Arriba::Font {
 inline std::string fontPath;
 #endif
 
-inline void loadFont(FT_Library ft, FT_Face& face) {
+inline std::unique_ptr<FontBackend> fontBackend;
+
+inline void initFontBackend() {
     #ifdef __SWITCH__
-    plInitialize(PlServiceType_User);
-    PlFontData standardFontData;
-    plGetSharedFontByType(&standardFontData, PlSharedFontType_Standard);
-    FT_New_Memory_Face(ft, reinterpret_cast<FT_Byte*>(standardFontData.address), standardFontData.size, 0, &face);
+    fontBackend = std::make_unique<FontBackendHOS>();
     #else
-    FT_New_Face(ft, fontPath.c_str(), 0, &face);
-    #endif
-}
-
-#ifdef __SWITCH__
-inline bool loadFontFallback(FT_Library ft, FT_Face& face, PlSharedFontType type) {
-    PlFontData fontData;
-    if (R_FAILED(plGetSharedFontByType(&fontData, type))) return false;
-    return FT_New_Memory_Face(ft, reinterpret_cast<FT_Byte*>(fontData.address), fontData.size, 0, &face) == 0;
-}
-#endif
-
-inline void unloadFont(FT_Library ft, FT_Face& face) {
-    FT_Done_Face(face);
-    FT_Done_FreeType(ft);
-    #ifdef __SWITCH__
-    plExit();
+    fontBackend = std::make_unique<FontBackendDesktop>();
     #endif
 }
 

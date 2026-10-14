@@ -48,11 +48,10 @@ namespace Arriba::Primitives {
     }
 
     void Text::updateFrameBuffer(const std::vector<Arriba::UIObject*>& chars) {
-        glBindFramebuffer(GL_FRAMEBUFFER, texture->FBO);
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        texture->bind();
+        texture->clear();
         for (auto* c : chars) drawTextureObject(c);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        texture->unbind();
         for (auto* c : chars) c->destroy();
     }
 }  // namespace Arriba::Primitives

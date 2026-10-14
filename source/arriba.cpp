@@ -1,4 +1,5 @@
 #include <arriba.h>
+#include <arribaFont.h>
 #include <stdlib.h>
 #include <time.h>
 #include <vector>
@@ -26,6 +27,7 @@ void init() {
         Arriba::Graphics::dockStatusCallback(AppletHookType_OnOperationMode, nullptr);
         appletHook(&switchDockCookie, Arriba::Graphics::dockStatusCallback, nullptr);
         #endif
+        Arriba::Font::initFontBackend();
         Arriba::Input::initInput();
         lastFrameTime = std::chrono::steady_clock::now();
         #ifdef __SWITCH__

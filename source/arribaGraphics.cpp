@@ -66,50 +66,26 @@ CharInfo getChar(char32_t c, int size) {
     std::map<char32_t, CharInfo>::iterator charIt = charMapT->find(c);
     if (charIt != charMapT->end()) return charIt->second;
 
-    FT_Library ft;
-    if (FT_Init_FreeType(&ft)) printf("Failed to init free type\n");
-    FT_Face face;
-    Arriba::Font::loadFont(ft, face);
-    FT_Set_Pixel_Sizes(face, 0, size);
+    Arriba::Font::fontBackend->open(size);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    FT_UInt glyphIndex = FT_Get_Char_Index(face, c);
+    FT_UInt glyphIndex = FT_Get_Char_Index(Arriba::Font::fontBackend->face, c);
+    if (glyphIndex == 0) Arriba::Font::fontBackend->tryFallbackGlyph(glyphIndex, c, size);
 
-    #ifdef __SWITCH__
-    if (glyphIndex == 0) {
-        static const PlSharedFontType fallbacks[] = {
-            PlSharedFontType_ChineseTraditional,
-            PlSharedFontType_ChineseSimplified,
-        };
-        for (PlSharedFontType type : fallbacks) {
-            FT_Face fallback;
-            if (Arriba::Font::loadFontFallback(ft, fallback, type)) {
-                FT_UInt idx = FT_Get_Char_Index(fallback, c);
-                if (idx != 0) {
-                    FT_Done_Face(face);
-                    face = fallback;
-                    glyphIndex = idx;
-                    FT_Set_Pixel_Sizes(face, 0, size);
-                    break;
-                }
-                FT_Done_Face(fallback);
-            }
-        }
-    }
-    #endif
+    if (FT_Load_Glyph(Arriba::Font::fontBackend->face, glyphIndex, FT_LOAD_RENDER)) printf("Failed to load char\n");
 
-    if (FT_Load_Glyph(face, glyphIndex, FT_LOAD_RENDER)) printf("Failed to load char\n");
-
-    unsigned int texture = bufferTexture_Red(face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
+    FT_GlyphSlot glyph = Arriba::Font::fontBackend->face->glyph;
+    unsigned int texture = bufferTexture_Red(glyph->bitmap.width, glyph->bitmap.rows, glyph->bitmap.buffer);
     CharInfo character = {
         texture,
-        Arriba::Maths::vec2<int>{face->glyph->bitmap.width, face->glyph->bitmap.rows},
-        Arriba::Maths::vec2<int>{face->glyph->bitmap_left, face->glyph->bitmap_top},
-        static_cast<unsigned int>(face->glyph->advance.x)};
+        Arriba::Maths::vec2<int>{(int)glyph->bitmap.width, (int)glyph->bitmap.rows},
+        Arriba::Maths::vec2<int>{glyph->bitmap_left, glyph->bitmap_top},
+        static_cast<unsigned int>(glyph->advance.x)
+    };
 
     charMapT->insert(std::make_pair(c, character));
 
-    Arriba::Font::unloadFont(ft, face);
+    Arriba::Font::fontBackend->close();
     return character;
 }
 
@@ -120,26 +96,22 @@ const std::map<char32_t, CharInfo>& getFont(int size) {
     else {
         std::map<char32_t, CharInfo> charMapT;
 
-        FT_Library ft;
-        if (FT_Init_FreeType(&ft)) printf("Failed to init free type\n");
-
-        FT_Face face;
-        Arriba::Font::loadFont(ft, face);
-        FT_Set_Pixel_Sizes(face, 0, size);
+        Arriba::Font::fontBackend->open(size);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         for (char32_t c = 0; c <= 255; c++) {
-            if (FT_Load_Glyph(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) printf("Failed to load char\n");
-            unsigned int texture = bufferTexture_Red(face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
+            if (FT_Load_Glyph(Arriba::Font::fontBackend->face, FT_Get_Char_Index(Arriba::Font::fontBackend->face, c), FT_LOAD_RENDER)) printf("Failed to load char\n");
+            FT_GlyphSlot glyph = Arriba::Font::fontBackend->face->glyph;
+            unsigned int texture = bufferTexture_Red(glyph->bitmap.width, glyph->bitmap.rows, glyph->bitmap.buffer);
             CharInfo character = {
                 texture,
-                Arriba::Maths::vec2<int>{face->glyph->bitmap.width, face->glyph->bitmap.rows},
-                Arriba::Maths::vec2<int>{face->glyph->bitmap_left, face->glyph->bitmap_top},
-                static_cast<unsigned int>(face->glyph->advance.x)};
+                Arriba::Maths::vec2<int>{(int)glyph->bitmap.width, (int)glyph->bitmap.rows},
+                Arriba::Maths::vec2<int>{glyph->bitmap_left, glyph->bitmap_top},
+                static_cast<unsigned int>(glyph->advance.x)};
             charMapT.insert(std::make_pair(c, character));
         }
 
-        Arriba::Font::unloadFont(ft, face);
+        Arriba::Font::fontBackend->close();
 
         auto [it, inserted] = charMapMap.insert({size, charMapT});
         return it->second;
@@ -361,6 +333,21 @@ void AdvancedTexture::resize(int width, int height) {
     clipSpaceMatrix = Arriba::Maths::makeOrtho(0.0f, static_cast<float>(tWidth), 0.0f, static_cast<float>(tHeight), 0.0f, 10000.0f);
 }
 
+void AdvancedTexture::bind() {
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glViewport(0, 0, tWidth, tHeight);
+}
+
+void AdvancedTexture::unbind() {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, renderWidth, renderHeight);
+}
+
+void AdvancedTexture::clear() {
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
 Renderer::Renderer() {
     glGenVertexArrays(1, &VAOID);
     glBindVertexArray(VAOID);
@@ -402,24 +389,22 @@ void Renderer::updateParentTransform(const Arriba::Maths::mat4<float>& pt) {
 }
 
 void Renderer::renderObject() {
-    thisShader.activate();
-    thisShader.setFloat4("colour", colour);
+    shader.activate();
+    shader.setFloat4("colour", colour);
     glBindVertexArray(VAOID);
 
     Arriba::Maths::mat4 transformationMatrix = getTransformMatrix();
-    glUniformMatrix4fv(thisShader.getUniformLocation("transform"), 1, GL_FALSE, (GLfloat*)&(transformationMatrix));
+    glUniformMatrix4fv(shader.getUniformLocation("transform"), 1, GL_FALSE, (GLfloat*)&(transformationMatrix));
 
-    int projectionLoc = thisShader.getUniformLocation("projection");
+    int projectionLoc = shader.getUniformLocation("projection");
 
     glBindTexture(GL_TEXTURE_2D, texID);
 
     if (FBOwner != nullptr) {
-        glBindFramebuffer(GL_FRAMEBUFFER, FBOwner->FBO);
-        glViewport(0, 0, FBOwner->tWidth, FBOwner->tHeight);
+        FBOwner->bind();
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat*)&(FBOwner->clipSpaceMatrix));
         glDrawElements(GL_TRIANGLES, sizeof(indexes)/sizeof(indexes[0]), GL_UNSIGNED_INT, 0);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, renderWidth, renderHeight);
+        FBOwner->unbind();
     } else {
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat*)&(clipSpaceMatrix));
         glDrawElements(GL_TRIANGLES, sizeof(indexes)/sizeof(indexes[0]), GL_UNSIGNED_INT, 0);

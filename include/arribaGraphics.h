@@ -73,6 +73,9 @@ public:
     ~AdvancedTexture();
 
     void resize(int width, int height);
+    void bind();
+    void unbind();
+    void clear();
     virtual void update() {}
 
     unsigned int texID;
@@ -105,7 +108,7 @@ protected:
 public:
     Renderer();
     ~Renderer();
-    Shader thisShader = Shader(Arriba::Graphics::getSharedShader("default"));
+    Shader shader = Shader(Arriba::Graphics::getSharedShader("default"));
 
     Arriba::Maths::mat4<float> getTransformMatrix();
     void updateParentTransform(const Arriba::Maths::mat4<float>& pt);

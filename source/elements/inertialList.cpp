@@ -176,7 +176,7 @@ namespace Arriba::Elements {
     }
 
     void InertialList::updateFrameBuffer() {
-        glBindFramebuffer(GL_FRAMEBUFFER, texture->FBO);
+        texture->bind();
         drawTextureObject(bg);
 
         unsigned int listItemRenderIndex = std::floor(-root->transform.position.y / static_cast<float>(itemHeight));
@@ -188,7 +188,7 @@ namespace Arriba::Elements {
             container->renderer->updateParentTransform(root->renderer->getTransformMatrix());
             drawTextureObject(container);
         }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        texture->unbind();
     }
 
     void InertialList::spawnTextForItem(unsigned int index) {
